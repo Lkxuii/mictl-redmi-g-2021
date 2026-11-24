@@ -1,0 +1,22 @@
+卸载 2.2.0 完成
+[SC] DeleteService 成功
+安装 2.1.0 完成
+PawnIO.sys @System32\drivers: False
+DriverStore: pawnio.inf_amd64_a72a2f969b8b7496
+  PawnIO.cat  11735
+  pawnio.inf  1214
+DriverStore: pawnio.inf_amd64_a92d2610b0f4c4c8
+  PawnIO.cat  11735
+  pawnio.inf  1096
+  pawnio.PNF  5612
+  PawnIO.sys  136496
+
+SERVICE_NAME: PawnIO 
+        TYPE               : 1  KERNEL_DRIVER  
+        STATE              : 4  RUNNING 
+                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+

@@ -1,0 +1,5 @@
+IsAdmin=True
+class path: \\LAPTOP-HPDT1BDA\ROOT\WMI:MICommonInterface
+GetMethod 返回属性: 
+inDef 属性: 
+ExecMethod EXCEPTION: 设置“ExecMethod”时发生异常：无法将类型“0”的值“int”转换为类型“Object”。

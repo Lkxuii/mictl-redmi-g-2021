@@ -1,0 +1,24 @@
+拿到 IWbemServices RCW
+[1 实例路径 GET fn13] GetObject hr=0x00000000
+[1 实例路径 GET fn13] GetMethod hr=0x00000000
+[1 实例路径 GET fn13] SpawnInstance hr=0x00000000
+[1 实例路径 GET fn13] Put(InData) hr=0x00000000
+[1 实例路径 GET fn13] ExecMethod hr=0x00000000
+[1 实例路径 GET fn13] EXCEPTION: COMException 异常来自 HRESULT:0x80041002
+[2 类路径 GET fn13] GetObject hr=0x00000000
+[2 类路径 GET fn13] GetMethod hr=0x00000000
+[2 类路径 GET fn13] SpawnInstance hr=0x00000000
+[2 类路径 GET fn13] Put(InData) hr=0x00000000
+[2 类路径 GET fn13] EXCEPTION: COMException 异常来自 HRESULT:0x8004102F
+[3 实例路径 GET fn22] GetObject hr=0x00000000
+[3 实例路径 GET fn22] GetMethod hr=0x00000000
+[3 实例路径 GET fn22] SpawnInstance hr=0x00000000
+[3 实例路径 GET fn22] Put(InData) hr=0x00000000
+[3 实例路径 GET fn22] ExecMethod hr=0x00000000
+[3 实例路径 GET fn22] EXCEPTION: COMException 异常来自 HRESULT:0x80041002
+[4 实例路径 GET fn8] GetObject hr=0x00000000
+[4 实例路径 GET fn8] GetMethod hr=0x00000000
+[4 实例路径 GET fn8] SpawnInstance hr=0x00000000
+[4 实例路径 GET fn8] Put(InData) hr=0x00000000
+[4 实例路径 GET fn8] ExecMethod hr=0x00000000
+[4 实例路径 GET fn8] EXCEPTION: COMException 异常来自 HRESULT:0x80041002

@@ -1,0 +1,5 @@
+=== MSAcpi_ThermalZoneTemperature (root\wmi) ===
+  ERROR: 无法从客户端中访问 CIM 资源。
+=== AMD 温度相关 WMI ===
+=== nvidia-smi ===
+  48.78, N/A, 9 %, 25.66 W, [N/A]

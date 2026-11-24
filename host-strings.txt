@@ -1,0 +1,7 @@
+兗Lroot\wmi
+MiInterface
+MICommonInterface
+MICommonInterface.InstanceName='ACPI\PNP0C14\MIFS_0'
+keyboard_color_adjust
+SELECT * from RW_TMAWMI
+Interface

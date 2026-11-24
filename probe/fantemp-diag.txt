@@ -1,0 +1,132 @@
+﻿[t=0s idle]
+  fn9 raw : 00 80 00 09 61 09 63 09 00 00 31 00 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2401  d[2..3] LE=2403   非零字节: d0=97 d1=9 d2=99 d3=9 d6=49 d10=35 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=35;GPU Core=4;GPU Hot Spot=39.3;GPU Package=23.8;] GpuNvidia 
+  nvidia  : temp,fan,power = 35.81, [N/A], 23.84 W
+[t=1s idle]
+  fn9 raw : 00 80 00 09 5B 09 66 09 00 00 31 00 00 00 24 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2395  d[2..3] LE=2406   非零字节: d0=91 d1=9 d2=102 d3=9 d6=49 d10=36 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=36;GPU Core=22;GPU Hot Spot=39.1;GPU Package=24.3;] GpuNvidia 
+  nvidia  : temp,fan,power = 36.22, [N/A], 24.80 W
+[t=2s idle]
+  fn9 raw : 00 80 00 09 5B 09 6E 09 00 00 32 00 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2395  d[2..3] LE=2414   非零字节: d0=91 d1=9 d2=110 d3=9 d6=50 d10=35 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=36;GPU Core=15;GPU Hot Spot=39.3;GPU Package=25.2;] GpuNvidia 
+  nvidia  : temp,fan,power = 36.34, [N/A], 24.93 W
+[t=3s idle]
+  fn9 raw : 00 80 00 09 61 09 66 09 00 00 31 00 00 00 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2401  d[2..3] LE=2406   非零字节: d0=97 d1=9 d2=102 d3=9 d6=49 d10=35 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=36;GPU Core=16;GPU Hot Spot=39.4;GPU Package=24.8;] GpuNvidia 
+  nvidia  : temp,fan,power = 36.09, [N/A], 24.82 W
+[t=4s idle]
+  fn9 raw : 00 80 00 09 61 09 6B 09 00 00 32 00 00 00 24 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2401  d[2..3] LE=2411   非零字节: d0=97 d1=9 d2=107 d3=9 d6=50 d10=36 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=36;GPU Core=17;GPU Hot Spot=39.8;GPU Package=24.9;] GpuNvidia 
+  nvidia  : temp,fan,power = 36.47, [N/A], 24.96 W
+[t=5s CPU-LOAD]
+  fn9 raw : 00 80 00 09 61 09 66 09 00 00 32 00 00 00 24 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2401  d[2..3] LE=2406   非零字节: d0=97 d1=9 d2=102 d3=9 d6=50 d10=36 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=36;GPU Core=13;GPU Hot Spot=39.5;GPU Package=24.8;] GpuNvidia 
+  nvidia  : temp,fan,power = 36.88, [N/A], 23.30 W
+[t=6s CPU-LOAD]
+  fn9 raw : 00 80 00 09 63 09 66 09 00 00 3D 00 00 00 24 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2403  d[2..3] LE=2406   非零字节: d0=99 d1=9 d2=102 d3=9 d6=61 d10=36 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=37;GPU Core=14;GPU Hot Spot=40.5;GPU Package=27.3;] GpuNvidia 
+  nvidia  : temp,fan,power = 37.50, [N/A], 24.23 W
+[t=7s CPU-LOAD]
+  fn9 raw : 00 80 00 09 63 09 66 09 00 00 3F 00 00 00 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2403  d[2..3] LE=2406   非零字节: d0=99 d1=9 d2=102 d3=9 d6=63 d10=37 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=37;GPU Core=17;GPU Hot Spot=41;GPU Package=25.1;] GpuNvidia 
+  nvidia  : temp,fan,power = 37.56, [N/A], 24.70 W
+[t=8s CPU-LOAD]
+  fn9 raw : 00 80 00 09 63 09 66 09 00 00 40 00 00 00 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2403  d[2..3] LE=2406   非零字节: d0=99 d1=9 d2=102 d3=9 d6=64 d10=37 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=38;GPU Core=17;GPU Hot Spot=41.3;GPU Package=25;] GpuNvidia 
+  nvidia  : temp,fan,power = 37.81, [N/A], 24.84 W
+[t=9s CPU-LOAD]
+  fn9 raw : 00 80 00 09 63 09 6E 09 00 00 40 00 00 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2403  d[2..3] LE=2414   非零字节: d0=99 d1=9 d2=110 d3=9 d6=64 d10=38 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=38;GPU Core=17;GPU Hot Spot=41.7;GPU Package=24.9;] GpuNvidia 
+  nvidia  : temp,fan,power = 38.38, [N/A], 24.53 W
+[t=10s CPU-LOAD]
+  fn9 raw : 00 80 00 09 5B 09 6E 09 00 00 40 00 00 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2395  d[2..3] LE=2414   非零字节: d0=91 d1=9 d2=110 d3=9 d6=64 d10=38 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=38;GPU Core=15;GPU Hot Spot=41.8;GPU Package=25.6;] GpuNvidia 
+  nvidia  : temp,fan,power = 38.72, [N/A], 25.60 W
+[t=11s CPU-LOAD]
+  fn9 raw : 00 80 00 09 61 09 6E 09 00 00 41 00 00 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2401  d[2..3] LE=2414   非零字节: d0=97 d1=9 d2=110 d3=9 d6=65 d10=38 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=39;GPU Core=16;GPU Hot Spot=42.2;GPU Package=24.6;] GpuNvidia 
+  nvidia  : temp,fan,power = 38.72, [N/A], 24.56 W
+[t=12s CPU-LOAD]
+  fn9 raw : 00 80 00 09 81 09 8C 09 00 00 41 00 00 00 27 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2433  d[2..3] LE=2444   非零字节: d0=129 d1=9 d2=140 d3=9 d6=65 d10=39 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=39;GPU Core=14;GPU Hot Spot=42.3;GPU Package=24.6;] GpuNvidia 
+  nvidia  : temp,fan,power = 39.41, [N/A], 25.92 W
+[t=13s CPU-LOAD]
+  fn9 raw : 00 80 00 09 95 09 66 09 00 00 42 00 00 00 27 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2453  d[2..3] LE=2406   非零字节: d0=149 d1=9 d2=102 d3=9 d6=66 d10=39 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=39;GPU Core=13;GPU Hot Spot=42.8;GPU Package=24.6;] GpuNvidia 
+  nvidia  : temp,fan,power = 39.81, [N/A], 24.97 W
+[t=14s CPU-LOAD]
+  fn9 raw : 00 80 00 09 71 09 76 09 00 00 42 00 00 00 27 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2417  d[2..3] LE=2422   非零字节: d0=113 d1=9 d2=118 d3=9 d6=66 d10=39 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=39;GPU Core=16;GPU Hot Spot=43.6;GPU Package=25.8;] GpuNvidia 
+  nvidia  : temp,fan,power = 40.09, [N/A], 24.98 W
+[t=15s CPU-LOAD]
+  fn9 raw : 00 80 00 09 7E 09 76 09 00 00 42 00 00 00 28 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2430  d[2..3] LE=2422   非零字节: d0=126 d1=9 d2=118 d3=9 d6=66 d10=40 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=40;GPU Core=15;GPU Hot Spot=43.8;GPU Package=24.8;] GpuNvidia 
+  nvidia  : temp,fan,power = 41.62, [N/A], 25.35 W
+[t=16s CPU-LOAD]
+  fn9 raw : 00 80 00 09 87 09 81 09 00 00 44 00 00 00 2A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2439  d[2..3] LE=2433   非零字节: d0=135 d1=9 d2=129 d3=9 d6=68 d10=42 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=41;GPU Core=16;GPU Hot Spot=45.6;GPU Package=24.6;] GpuNvidia 
+  nvidia  : temp,fan,power = 42.34, [N/A], 25.20 W
+[t=17s idle]
+  fn9 raw : 00 80 00 09 8C 09 84 09 00 00 45 00 00 00 2A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2444  d[2..3] LE=2436   非零字节: d0=140 d1=9 d2=132 d3=9 d6=69 d10=42 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=42;GPU Core=15;GPU Hot Spot=46.6;GPU Package=24.9;] GpuNvidia 
+  nvidia  : temp,fan,power = 42.81, [N/A], 25.11 W
+[t=18s idle]
+  fn9 raw : 00 80 00 09 89 09 89 09 00 00 44 00 00 00 2B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2441  d[2..3] LE=2441   非零字节: d0=137 d1=9 d2=137 d3=9 d6=68 d10=43 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=43;GPU Core=17;GPU Hot Spot=46;GPU Package=24.7;] GpuNvidia 
+  nvidia  : temp,fan,power = 42.84, [N/A], 25.48 W
+[t=19s idle]
+  fn9 raw : 00 80 00 09 87 09 81 09 00 00 42 00 00 00 2B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2439  d[2..3] LE=2433   非零字节: d0=135 d1=9 d2=129 d3=9 d6=66 d10=43 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=43;GPU Core=17;GPU Hot Spot=46.1;GPU Package=25.5;] GpuNvidia 
+  nvidia  : temp,fan,power = 43.16, [N/A], 25.52 W
+[t=20s idle]
+  fn9 raw : 00 80 00 09 84 09 89 09 00 00 41 00 00 00 2B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2436  d[2..3] LE=2441   非零字节: d0=132 d1=9 d2=137 d3=9 d6=65 d10=43 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=42;GPU Core=16;GPU Hot Spot=46.1;GPU Package=25.4;] GpuNvidia 
+  nvidia  : temp,fan,power = 42.66, [N/A], 25.33 W
+[t=21s idle]
+  fn9 raw : 00 80 00 09 87 09 8C 09 00 00 40 00 00 00 2A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  status  : 0x80  echo=9
+  d[0..1] LE=2439  d[2..3] LE=2444   非零字节: d0=135 d1=9 d2=140 d3=9 d6=64 d10=42 
+  LHM     : CPU[Package=0;Core (Tctl/Tdie)=0;] GPU[GPU Core=42;GPU Core=18;GPU Hot Spot=46.4;GPU Package=25.4;] GpuNvidia 
+  nvidia  : temp,fan,power = 42.75, [N/A], 25.49 W

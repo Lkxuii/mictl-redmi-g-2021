@@ -1,0 +1,96 @@
+=== WinRing0 服务状态 ===
+LHM dir: C:\Users\Lkxuii\AppData\Local\LibreHardwareMonitor exists=False
+
+=== 传感器树 ===
+[Motherboard] TM2037  id=/motherboard
+[Cpu] AMD Ryzen 7 5800H with Radeon Graphics  id=/amdcpu/0
+  Load | CPU Core #1 | 1.3
+  Load | CPU Core #2 | 0
+  Load | CPU Core #3 | 45.46
+  Load | CPU Core #4 | 38.07
+  Load | CPU Core #5 | 0
+  Load | CPU Core #6 | 0
+  Load | CPU Core #7 | 12.14
+  Load | CPU Core #8 | 2.8
+  Load | CPU Core #9 | 0
+  Load | CPU Core #10 | 0
+  Load | CPU Core #11 | 30.33
+  Load | CPU Core #12 | 10.43
+  Load | CPU Core #13 | 0
+  Load | CPU Core #14 | 0
+  Load | CPU Core #15 | 68.28
+  Load | CPU Core #16 | 33.26
+  Load | CPU Total | 14.46
+  Load | CPU Core Max | 68.28
+  Power | Package | 0
+  Clock | Core #1 | NaN
+  Factor | Core #1 | NaN
+  Power | Core #1 (SMU) | 0
+  Voltage | Core #1 VID | 1.55
+  Clock | Core #2 | NaN
+  Factor | Core #2 | NaN
+  Power | Core #2 (SMU) | 0
+  Voltage | Core #2 VID | 1.55
+  Clock | Core #3 | NaN
+  Factor | Core #3 | NaN
+  Power | Core #3 (SMU) | 0
+  Voltage | Core #3 VID | 1.55
+  Clock | Core #4 | NaN
+  Factor | Core #4 | NaN
+  Power | Core #4 (SMU) | 0
+  Voltage | Core #4 VID | 1.55
+  Clock | Core #5 | NaN
+  Factor | Core #5 | NaN
+  Power | Core #5 (SMU) | 0
+  Voltage | Core #5 VID | 1.55
+  Clock | Core #6 | NaN
+  Factor | Core #6 | NaN
+  Power | Core #6 (SMU) | 0
+  Voltage | Core #6 VID | 1.55
+  Clock | Core #7 | NaN
+  Factor | Core #7 | NaN
+  Power | Core #7 (SMU) | 0
+  Voltage | Core #7 VID | 1.55
+  Clock | Core #8 | NaN
+  Factor | Core #8 | NaN
+  Power | Core #8 (SMU) | 0
+  Voltage | Core #8 VID | 1.55
+  Temperature | Core (Tctl/Tdie) | 0
+  Voltage | Core (SVI2 TFN) | 1.55
+  Voltage | SoC (SVI2 TFN) | 1.55
+[GpuNvidia] NVIDIA GeForce RTX 3060 Laptop GPU  id=/gpu-nvidia/0
+  Temperature | GPU Core | 49
+  Clock | GPU Core | 1567
+  Clock | GPU Memory | 7501
+  Load | GPU Core | 9
+  Load | GPU Memory Controller | 2
+  Load | GPU Video Engine | 0
+  Load | GPU Bus | 0
+  SmallData | D3D Dedicated Memory Used | 1342.29
+  SmallData | D3D Shared Memory Used | 74.7
+  Load | D3D 3D | 13.92
+  Load | D3D Compute_0 | 0
+  Load | D3D Overlay | 0
+  Load | D3D Video Decode | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0.23
+  Load | D3D Security | 0
+  Load | D3D Video Encode | 0
+  Load | D3D OFA_0 | 0
+  Load | D3D Graphics_1 | 0
+  Load | D3D Cuda | 0
+  Load | D3D Compute_1 | 0
+  Load | D3D VR | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Security_1 | 0
+  Temperature | GPU Hot Spot | 52.69
+  SmallData | GPU Memory Total | 6144
+  SmallData | GPU Memory Free | 4658
+  SmallData | GPU Memory Used | 1485
+  Load | GPU Memory | 24.17
+  Power | GPU Package | 24.24
+  Throughput | GPU PCIe Rx | 42449920
+  Throughput | GPU PCIe Tx | 6049792

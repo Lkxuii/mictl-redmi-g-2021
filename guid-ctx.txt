@@ -1,0 +1,6 @@
+=== [6E5C5DE2-0AC5-446A-A473-2F736CD06B18/ASCII] ===
+  ··ForceRemove {6E5C5DE2-0AC5-446A-A473-2F736CD06B18} = s 'FooCom Class'·
+=== [799F1D61-045A-4A3C-895A-03152C28A2F2/ASCII] ===
+  ···TypeLib = s '{799F1D61-045A-4A3C-895A-03152C28A2F2}'·
+=== [DF541A2B-1DAD-4930-B42B-79719761F838/UTF16] ===
+  ·······༘· ·····Ԣᦓ··홠·······཈· ·········ņ···À··䘀㍈䀎··읐䀉··옰䀉··와䀉··움䀉··원䀉··옐䀉··APPID···Ԣᦓ··홠·······ᄐ· ·····Ԣᦓ··�···ᅈ···ᅰ· ·····Ԣᦓ··········ᇀ· ·····Ԣᦓ··ᑨ·······ᑸ·0·····Ԣᦓ··ᒸ·······ᓀ·(·····.tlb·······À··䘀CLSID\··\Required Categories····\Implemented Categories·OLEAUT32.DLL····湕敒楧瑳牥祔数楌䙢牯獕牥····敒楧瑳牥祔数楌䙢牯獕牥·{DF541A2B-1DAD-4930-B42B-79719761F838}··GamingBoxHost···小米游戏盒子宿主服务，停止此服务会使您的小米硬件无法被检测。··%s\GamingBoxHost.properties·Start init··潶摩张损敤汣䌠楍敄楶散敓癲捩䵥摯汵㩥椺楮⡴潶摩)楍敄楶散敓癲捩⹥灣p······Global\EventGameBoxNvdiaGpuInformationNotification··LocalService····Could not open Service Manager··Could not open service··Could not stop service··Could not delete serv

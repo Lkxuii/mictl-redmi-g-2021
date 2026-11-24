@@ -1,0 +1,6 @@
+IsAdmin=True
+[p1 单引号+单反斜杠]: MgmtException NotFound hr=0x80131501 找不到 
+[p2 单引号+双反斜杠转义]: MgmtException NotFound hr=0x80131501 找不到 
+[p3 双引号+双反斜杠]: MgmtException NotFound hr=0x80131501 找不到 
+[p4 类相对路径]: ArgumentOutOfRangeException 指定的参数已超出有效值的范围。
+参数名: path

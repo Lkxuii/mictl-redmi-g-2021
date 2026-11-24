@@ -1,0 +1,15 @@
+﻿IsAdmin=True
+InstanceCount=1
+  instance: \\LAPTOP-HPDT1BDA\root\WMI:MICommonInterface.InstanceName="ACPI\\PNP0C14\\MIFS_0"
+[class-call fn13 FAN_SPEEDS]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn22 CPU_THERM]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn8 PER_MODE]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn19 AC_TYPE]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn23 CPU_POWER]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn21 MAX_FAN_SPEED]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn20 MAX_FAN_SWITCH]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn9 GPU_MODE]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn11 FN_LOCK]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn12 TP_LOCK]: EXCEPTION ManagementException 无效的方法参数 
+[class-call fn10 KBD_TYPE]: EXCEPTION ManagementException 无效的方法参数 
+[inst-call] EXCEPTION: 找不到 

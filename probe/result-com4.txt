@@ -1,0 +1,29 @@
+GetMethod hr=0x00000000
+--- InSignature ---
+IN ObjectText:
+[abstract]
+class __PARAMETERS
+{
+	[in, Description("WMI Interface"), MAX(32), ID(0): DisableOverride ToInstance] uint8 InData[];
+};
+
+--- OutSignature ---
+OUT ObjectText:
+[abstract]
+class __PARAMETERS
+{
+	[out, MAX(30), ID(1): DisableOverride ToInstance] uint8 OutData[];
+	[out, ID(2): DisableOverride ToInstance] uint16 Reserved;
+};
+
+Put(InData) hr=0x00000000
+ExecMethod hr=0x00000000
+--- 输出对象 ---
+OUTINST ObjectText:
+
+instance of __PARAMETERS
+{
+	OutData = {0, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	Reserved = 0;
+};
+

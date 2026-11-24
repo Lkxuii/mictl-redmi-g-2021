@@ -1,0 +1,19 @@
+IsAdmin=True
+--- 类调用变体 ---
+[A class in=32B]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[B class in=32B+out30+res]: MgmtException code=NotFound hr=0x80131501 msg=找不到 
+[E class in=31B]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[F class in=28B]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+--- 实例调用变体 ---
+instance: \\LAPTOP-HPDT1BDA\root\WMI:MICommonInterface.InstanceName="ACPI\\PNP0C14\\MIFS_0"
+[C inst in=32B]: MgmtException code=NotFound hr=0x80131501 msg=找不到 
+[D inst in=32B+out30+res]: MgmtException code=NotFound hr=0x80131501 msg=找不到 
+--- 语义读取（若 A 变体成功） ---
+[GET fn13 FAN_SPEEDS]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn22 CPU_THERM]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn8 PER_MODE]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn19 AC_TYPE]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn23 CPU_POWER]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn21 MAX_FAN_SPEED]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn20 MAX_FAN_SWITCH]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 
+[GET fn9 GPU_MODE]: MgmtException code=InvalidMethodParameters hr=0x80131501 msg=无效的方法参数 

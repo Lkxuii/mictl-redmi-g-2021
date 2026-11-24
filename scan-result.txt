@@ -1,0 +1,43 @@
+===== C:\Program Files (x86)\Timi Personal Computing\GamingBox\1.4.0.851\LaunchBroker.dll =====
+===== C:\Program Files (x86)\Timi Personal Computing\GamingBox\1.4.0.851\GamingBoxHost.exe =====
+  UTF16 [MICommonInterface] x2
+  UTF16 [MiInterface] x1
+  UTF16 [InData] x1
+  UTF16 [OutData] x1
+  UTF16 [MIFS] x1
+  ASCII [WMI] x1
+  UTF16 [WMI] x1
+  ASCII [GamingBoxHost] x1
+  UTF16 [GamingBoxHost] x7
+===== C:\Program Files (x86)\Timi Personal Computing\GamingBox\1.4.0.851\KeyboardMonitor.dll =====
+===== 相关服务/驱动 =====
+  driver: AcpiPmi | ACPI 电源表驱动程序 | Stopped | C:\Windows\system32\drivers\acpipmi.sys
+  driver: AmdMicroPEP | AMD Micro PEP Device | Running | C:\Windows\system32\DriverStore\FileRepository\amdmicropep.inf_amd64_0ee9b60764bf0bba\AmdMicroPEP.sys
+  driver: BthMini | 蓝牙无线收发器驱动程序 | Stopped | C:\Windows\system32\drivers\BTHMINI.sys
+  driver: FileCrypt | FileCrypt | Running | C:\Windows\system32\drivers\filecrypt.sys
+  driver: IndirectKmd | Indirect Displays 内核模式驱动程序 | Stopped | C:\Windows\system32\drivers\IndirectKmd.sys
+  driver: IPMIDRV | IPMIDRV | Stopped | C:\Windows\system32\drivers\IPMIDrv.sys
+  driver: KSecDD | KSecDD | Running | C:\Windows\system32\Drivers\ksecdd.sys
+  driver: KSecPkg | KSecPkg | Running | C:\Windows\system32\Drivers\ksecpkg.sys
+  driver: MiServiceDaemon | MiServiceDaemon | Running | \??\C:\Program Files (x86)\Timi Personal Computing\MiService\3.1.0.387\Drivers\MiServiceDaemon.sys
+  driver: mvumis | mvumis | Stopped | C:\Windows\system32\drivers\mvumis.sys
+  driver: PptpMiniport | WAN 微型端口(PPTP) | Running | C:\Windows\system32\drivers\raspptp.sys
+  driver: RdpVideoMiniport | Remote Desktop Video Miniport Driver | Stopped | C:\Windows\system32\drivers\rdpvideominiport.sys
+  driver: terminpt | Microsoft 远程桌面输入驱动程序 | Stopped | C:\Windows\system32\drivers\terminpt.sys
+  driver: UdeCx | USB Device Emulation Support Library | Stopped | C:\Windows\system32\drivers\udecx.sys
+  driver: WmiAcpi | Microsoft Windows Management Interface for ACPI | Running | C:\Windows\system32\drivers\wmiacpi.sys
+  service: GamingBoxHost | GamingBoxHost | Running
+  service: GamingServices | Gaming Services | Running
+  service: GamingServicesNet | Gaming Services | Running
+  service: MiService | MiService | Running
+  service: MixedRealityOpenXRSvc | Windows Mixed Reality OpenXR Service | Stopped
+  service: PimIndexMaintenanceSvc_90474 | Contact Data_90474 | Running
+  service: vmicguestinterface | Hyper-V Guest Service Interface | Stopped
+  service: vmicheartbeat | Hyper-V Heartbeat Service | Stopped
+  service: vmickvpexchange | Hyper-V Data Exchange Service | Stopped
+  service: vmicrdv | Hyper-V 远程桌面虚拟化服务 | Stopped
+  service: vmicshutdown | Hyper-V Guest Shutdown Service | Stopped
+  service: vmictimesync | Hyper-V Time Synchronization Service | Stopped
+  service: vmicvmsession | Hyper-V PowerShell Direct Service | Stopped
+  service: vmicvss | Hyper-V 卷影复制请求程序 | Stopped
+  service: wmiApSrv | WMI Performance Adapter | Stopped

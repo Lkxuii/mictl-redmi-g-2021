@@ -1,0 +1,29 @@
+# 编译产物与二进制
+*.exe
+*.dll
+*.pdb
+*.zip
+*.sys
+
+# 运行时依赖目录（build.ps1 会自动下载）
+MiCtl/libs/
+MiCtl/out/
+lhm-extract/
+lhm094-extract/
+pawnio-extract/
+probe096/
+probe/*.dll
+
+# 厂商安装包
+PawnIO_setup*.exe
+
+# 会话与本地产物
+.zcode/
+mof/
+*.log
+
+# 误下载的占位文件
+probe/lhm-kernel.cs
+
+# 临时结果
+probe/result-sys.txt

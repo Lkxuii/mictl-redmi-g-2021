@@ -1,0 +1,107 @@
+=== WinRing0 服务状态 ===
+LHM dir: C:\Users\Lkxuii\AppData\Local\LibreHardwareMonitor exists=False
+
+=== 传感器树 ===
+[Motherboard] TM2037  id=/motherboard
+[Cpu] AMD Ryzen 7 5800H with Radeon Graphics  id=/amdcpu/0
+  Load | CPU Core #1 | 6.67
+  Load | CPU Core #2 | 0
+  Load | CPU Core #3 | 40
+  Load | CPU Core #4 | 66.67
+  Load | CPU Core #5 | 7.69
+  Load | CPU Core #6 | 0
+  Load | CPU Core #7 | 30.77
+  Load | CPU Core #8 | 7.69
+  Load | CPU Core #9 | 0
+  Load | CPU Core #10 | 0
+  Load | CPU Core #11 | 40
+  Load | CPU Core #12 | 7.14
+  Load | CPU Core #13 | 0
+  Load | CPU Core #14 | 0
+  Load | CPU Core #15 | 13.33
+  Load | CPU Core #16 | 53.33
+  Load | CPU Total | 17.08
+  Load | CPU Core Max | 66.67
+  Power | Package | 0
+  Clock | Cores (Average) | 0
+  Clock | Cores (Average Effective) | 0
+  Clock | Core #1 | (null)
+  Clock | Core #1 (Effective) | 0
+  Factor | Core #1 | (null)
+  Power | Core #1 (SMU) | 0
+  Voltage | Core #1 VID | 1.55
+  Clock | Core #2 | (null)
+  Clock | Core #2 (Effective) | 0
+  Factor | Core #2 | (null)
+  Power | Core #2 (SMU) | 0
+  Voltage | Core #2 VID | 1.55
+  Clock | Core #3 | (null)
+  Clock | Core #3 (Effective) | 0
+  Factor | Core #3 | (null)
+  Power | Core #3 (SMU) | 0
+  Voltage | Core #3 VID | 1.55
+  Clock | Core #4 | (null)
+  Clock | Core #4 (Effective) | 0
+  Factor | Core #4 | (null)
+  Power | Core #4 (SMU) | 0
+  Voltage | Core #4 VID | 1.55
+  Clock | Core #5 | (null)
+  Clock | Core #5 (Effective) | 0
+  Factor | Core #5 | (null)
+  Power | Core #5 (SMU) | 0
+  Voltage | Core #5 VID | 1.55
+  Clock | Core #6 | (null)
+  Clock | Core #6 (Effective) | 0
+  Factor | Core #6 | (null)
+  Power | Core #6 (SMU) | 0
+  Voltage | Core #6 VID | 1.55
+  Clock | Core #7 | (null)
+  Clock | Core #7 (Effective) | 0
+  Factor | Core #7 | (null)
+  Power | Core #7 (SMU) | 0
+  Voltage | Core #7 VID | 1.55
+  Clock | Core #8 | (null)
+  Clock | Core #8 (Effective) | 0
+  Factor | Core #8 | (null)
+  Power | Core #8 (SMU) | 0
+  Voltage | Core #8 VID | 1.55
+  Temperature | Core (Tctl/Tdie) | 0
+  Voltage | Core (SVI2 TFN) | 1.55
+  Voltage | SoC (SVI2 TFN) | 1.55
+[GpuNvidia] NVIDIA GeForce RTX 3060 Laptop GPU  id=/gpu-nvidia/0
+  Temperature | GPU Core | 48
+  Clock | GPU Core | 1567
+  Clock | GPU Memory | 7501
+  Load | GPU Core | 7
+  Load | GPU Memory Controller | 2
+  Load | GPU Video Engine | 0
+  Load | GPU Bus | 1
+  Voltage | GPU Core Voltage | 0.78
+  SmallData | D3D Dedicated Memory Used | 1415.47
+  SmallData | D3D Shared Memory Used | 74.05
+  Load | D3D 3D | 9.67
+  Load | D3D Compute_0 | 0
+  Load | D3D Overlay | 0
+  Load | D3D Video Decode | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0.24
+  Load | D3D Security | 0
+  Load | D3D Video Encode | 0
+  Load | D3D Optical Flow Accelerator 0 | 0
+  Load | D3D Graphics_1 | 0
+  Load | D3D Cuda | 0
+  Load | D3D Compute_1 | 0
+  Load | D3D VR | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Security_1 | 0
+  Temperature | GPU Hot Spot | 52.53
+  SmallData | GPU Memory Total | 6144
+  SmallData | GPU Memory Free | 4585
+  SmallData | GPU Memory Used | 1558
+  Load | GPU Memory | 25.36
+  Power | GPU Package | 24.28
+  Throughput | GPU PCIe Rx | 57149440
+  Throughput | GPU PCIe Tx | 6699008

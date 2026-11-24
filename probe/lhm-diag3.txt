@@ -1,0 +1,10 @@
+Ring0 类型: LibreHardwareMonitor.Hardware.Ring0
+Ring0.IsOpen = False
+--- Ring0 Report ---
+Ring0
+
+Status: Installing driver "D:\ZCode\.zcode\workspace\d5dbea00-ec3e-4c33-a2a1-69fb62e36ba5\probe\LhmDiag2.sys" failed and file exists
+First Exception: StartService returned the error code: 000005AA.
+Second Exception: StartService returned the error code: 000005AA.
+
+

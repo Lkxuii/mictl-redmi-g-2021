@@ -1,0 +1,91 @@
+Class properties: 
+  HighDateTime : UInt32
+  LowDateTime : UInt32
+  MofProcessed : Boolean
+  Name : String
+--- instance 0 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780704,LowDateTime=3719974656,Name="C:\\Windows\\System32\\drivers\\mssmbios.sys[MofResource]"
+  prop HighDateTime = 30780704
+  prop LowDateTime = 3719974656
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\mssmbios.sys[MofResource]
+--- instance 1 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780704,LowDateTime=3719818949,Name="C:\\Windows\\system32\\drivers\\battc.sys[BATTCWMI]"
+  prop HighDateTime = 30780704
+  prop LowDateTime = 3719818949
+  prop MofProcessed = True
+  prop Name = C:\Windows\system32\drivers\battc.sys[BATTCWMI]
+--- instance 2 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780751,LowDateTime=3386165235,Name="C:\\Windows\\System32\\drivers\\zh-CN\\processr.sys.mui[PROCESSORWMI]"
+  prop HighDateTime = 30780751
+  prop LowDateTime = 3386165235
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\zh-CN\processr.sys.mui[PROCESSORWMI]
+--- instance 3 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31274315,LowDateTime=333437418,Name="C:\\Windows\\System32\\drivers\\ACPI.sys[ACPIMOFResource]"
+  prop HighDateTime = 31274315
+  prop LowDateTime = 333437418
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\ACPI.sys[ACPIMOFResource]
+--- instance 4 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=0,LowDateTime=3236604974,Name="ACPI\\PNP0C14\\AOD_0-{05901221-D566-11d1-B2F0-00A0C9062910}"
+  prop HighDateTime = 0
+  prop LowDateTime = 3236604974
+  prop MofProcessed = True
+  prop Name = ACPI\PNP0C14\AOD_0-{05901221-D566-11d1-B2F0-00A0C9062910}
+--- instance 5 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31290420,LowDateTime=1429459142,Name="C:\\Windows\\system32\\kernelbase.dll[MofResourceName]"
+  prop HighDateTime = 31290420
+  prop LowDateTime = 1429459142
+  prop MofProcessed = True
+  prop Name = C:\Windows\system32\kernelbase.dll[MofResourceName]
+--- instance 6 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31290420,LowDateTime=1036966750,Name="C:\\Windows\\System32\\Drivers\\portcls.SYS[PortclsMof]"
+  prop HighDateTime = 31290420
+  prop LowDateTime = 1036966750
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\Drivers\portcls.SYS[PortclsMof]
+--- instance 7 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780751,LowDateTime=3408044511,Name="C:\\Windows\\system32\\drivers\\zh-CN\\ndis.sys.mui[MofResourceName]"
+  prop HighDateTime = 30780751
+  prop LowDateTime = 3408044511
+  prop MofProcessed = False
+  prop Name = C:\Windows\system32\drivers\zh-CN\ndis.sys.mui[MofResourceName]
+--- instance 8 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31280373,LowDateTime=1931052807,Name="C:\\Windows\\System32\\drivers\\zh-CN\\ACPI.sys.mui[ACPIMOFResource]"
+  prop HighDateTime = 31280373
+  prop LowDateTime = 1931052807
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\zh-CN\ACPI.sys.mui[ACPIMOFResource]
+--- instance 9 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780751,LowDateTime=3386799096,Name="C:\\Windows\\System32\\drivers\\zh-CN\\mssmbios.sys.mui[MofResource]"
+  prop HighDateTime = 30780751
+  prop LowDateTime = 3386799096
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\zh-CN\mssmbios.sys.mui[MofResource]
+--- instance 10 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31290420,LowDateTime=1035252697,Name="C:\\Windows\\System32\\drivers\\HDAudBus.sys[HDAudioMofName]"
+  prop HighDateTime = 31290420
+  prop LowDateTime = 1035252697
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\HDAudBus.sys[HDAudioMofName]
+--- instance 11 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31274315,LowDateTime=331919452,Name="C:\\Windows\\System32\\drivers\\monitor.sys[MonitorWMI]"
+  prop HighDateTime = 31274315
+  prop LowDateTime = 331919452
+  prop MofProcessed = False
+  prop Name = C:\Windows\System32\drivers\monitor.sys[MonitorWMI]
+--- instance 12 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31274315,LowDateTime=320636594,Name="C:\\Windows\\System32\\drivers\\bthhfenum.sys[MofResourceName]"
+  prop HighDateTime = 31274315
+  prop LowDateTime = 320636594
+  prop MofProcessed = False
+  prop Name = C:\Windows\System32\drivers\bthhfenum.sys[MofResourceName]
+--- instance 13 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31274315,LowDateTime=333768588,Name="C:\\Windows\\System32\\drivers\\processr.sys[PROCESSORWMI]"
+  prop HighDateTime = 31274315
+  prop LowDateTime = 333768588
+  prop MofProcessed = True
+  prop Name = C:\Windows\System32\drivers\processr.sys[PROCESSORWMI]
+--- instance 14 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=30780704,LowDateTime=3720462122,Name="C:\\Windows\\System32\\drivers\\wmiacpi.sys[MofResource]"
+  prop HighDateTime = 30780704
+  prop LowDateTime = 3720462122
+  prop MofProcessed = False
+  prop Name = C:\Windows\System32\drivers\wmiacpi.sys[MofResource]
+--- instance 15 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=0,LowDateTime=3741035072,Name="ACPI\\PNP0C14\\MIFS_0-{05901221-D566-11d1-B2F0-00A0C9062910}"
+  prop HighDateTime = 0
+  prop LowDateTime = 3741035072
+  prop MofProcessed = True
+  prop Name = ACPI\PNP0C14\MIFS_0-{05901221-D566-11d1-B2F0-00A0C9062910}
+--- instance 16 path=\\LAPTOP-HPDT1BDA\ROOT\wmi:WMIBinaryMofResource.HighDateTime=31290420,LowDateTime=2168698815,Name="C:\\Windows\\system32\\zh-CN\\kernelbase.dll.mui[MofResourceName]"
+  prop HighDateTime = 31290420
+  prop LowDateTime = 2168698815
+  prop MofProcessed = True
+  prop Name = C:\Windows\system32\zh-CN\kernelbase.dll.mui[MofResourceName]
+total=17
