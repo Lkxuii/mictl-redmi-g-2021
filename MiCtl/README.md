@@ -9,9 +9,9 @@
 |---|---|---|
 | 性能档位（静谧 / 均衡 / 极速） | 固件接口 fn8 | 实测：写入后回读一致 |
 | 风扇转速 | 固件接口 fn9 轮询（每 2 秒） | 实测：与游戏盒子同源数据 |
-| CPU / GPU 温度 | 固件接口 fn9 轮询 | 实测：CPU 值随满载变化，GPU 值与 nvidia-smi 逐秒一致 |
+| CPU / GPU 温度 | 固件接口 fn9 轮询 | 实测：CPU 值随满载变化，GPU 值与 nvidia-smi 逐秒一致；CPU 值与 PawnIO/SMN 独立读数一致（±0.5°C） |
 | GPU 负载 / 功耗 | NVML（经 LibreHardwareMonitorLib） | 实测有数值 |
-| CPU 功耗 | LibreHardwareMonitorLib + PawnIO | **当前读不到**（PawnIO 未安装，见下） |
+| CPU 功耗 | LibreHardwareMonitorLib + PawnIO | 实测有数值（16~20W，需安装 PawnIO） |
 | 网速 | 网卡计数差分 | 实测有数值 |
 | 档位跟随（游戏盒子 / 键盘切换后同步） | 轮询 fn8 | 数据层实测，界面未目视确认 |
 | 触控板 / Fn 锁状态跟随键盘快捷键 | EC 事件 id 6 / 7 | 事件实测能收到；Fn 锁"开/关"的映射**未独立验证** |
@@ -61,15 +61,13 @@
 
 - 需要管理员权限（固件接口的写操作）。
 - 温度、转速、档位、GPU 负载/功耗都**不需要内核驱动**。
+- CPU 功耗需要 [PawnIO](https://github.com/namazso/PawnIO.Setup/releases) 2.1.0（装完重启 MiCtl）。没有它其余功能不受影响，只是 CPU 功耗显示 "--"。
 
-### 关于 PawnIO
+### PawnIO 安装注意（踩过的坑）
 
-只有 CPU 功耗读数需要它（通过 LibreHardwareMonitorLib 读 AMD SMN）。
-
-- 系统里**当前没有安装** PawnIO（服务、设备、安装目录都不存在）。
-- 2026-11-19 那次安装 2.1.0 实际是失败的（`C:\Windows\INF\setupapi.dev.log` 记录了"创建服务失败 / 设备实例安装失败 0x430"）：安装脚本在安装前一秒执行了 `sc delete PawnIO`，旧服务还处于标记删除状态。当时驱动恰好在运行，所以能读到温度，但重启后不会再加载。
-- PawnIO 2.2.0 的安装包有问题：只部署了 `PawnIO.cat` / `pawnio.inf`，没有 `PawnIO.sys`。
-- WinRing0 在这台机器上不可用：`StartService` 返回 `0x5AA`（驱动被系统拦截）。
+- **2.2.0 的安装包有缺陷**：只部署 `PawnIO.cat` / `pawnio.inf`，没有 `PawnIO.sys`，装完驱动无法启动。用 **2.1.0**。
+- 安装前不要执行 `sc delete PawnIO`：服务处于"标记删除"状态时，新装的 `AddService` 会失败（错误 0x430），且要重启才能恢复。本仓库的 `install-pawnio-clean.ps1` 是验证过可用的安装+验证脚本。
+- WinRing0 在这台机器上不可用：`StartService` 返回 `0x5AA`（驱动被系统拦截），所以 LibreHardwareMonitor 0.9.4 及更早的内嵌 WinRing0 路径全部无效，必须用 0.9.6 + PawnIO。
 
 ## 配置
 

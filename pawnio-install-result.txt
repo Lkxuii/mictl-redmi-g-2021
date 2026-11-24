@@ -1,0 +1,23 @@
+安装前服务状态: 未安装
+[SC] EnumQueryServicesStatus:OpenService 失败 1060:
+
+指定的服务未安装。
+服务: RUNNING
+SERVICE_NAME: PawnIO 
+        TYPE               : 1  KERNEL_DRIVER  
+        STATE              : 4  RUNNING 
+                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+设备: 存在 ROOT\PAWNIO 设备
+实例 ID:                ROOT\PAWNIO\0000
+设备描述:         PawnIO
+类名:                 SoftwareDevice
+类 GUID:                 {62f9c741-b25a-46ce-b54c-9bccce08b6f2}
+制造商名称:          namazso
+状态:                     已启动
+驱动程序名称:                oem9.inf
+DriverStore 包: pawnio.inf_amd64_a72a2f969b8b7496  PawnIO.sys=False
+DriverStore 包: pawnio.inf_amd64_a92d2610b0f4c4c8  PawnIO.sys=True
