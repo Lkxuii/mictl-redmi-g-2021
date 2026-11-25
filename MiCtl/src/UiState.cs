@@ -95,7 +95,7 @@ namespace MiCtl
         public bool TouchpadDeviceDisabled;    // 设备层（本程序通过 pnputil 控制的那一层）
         public int? TouchpadEcValue;           // 键盘快捷键那一层（EC 事件），null = 启动后还没收到过事件
         public bool WinKeyLocked;
-        public int? FnLockValue;               // null = 未知；0 = 解锁（F1–F12 出音量等）、1 = 锁定（正常 F1）——语义已确认，value 对应待对照
+        public int? FnLockValue;               // null = 未知；1 = 锁定（正常 F1）、0 = 解锁（F1–F12 出音量等）——已对照确认
         public int? GpuMode;                   // null = 未知；0 = 混合模式，1 = 独显直连
 
         public bool StartupEnabled;

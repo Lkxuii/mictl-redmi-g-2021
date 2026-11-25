@@ -371,7 +371,7 @@ namespace MiCtl
             _pillFnLock = new StatusPill();
             _pillFnLock.Location = Theme.P(M + 92, y + 8);
             p.Controls.Add(_pillFnLock);
-            _lblFnNote = Lbl("解锁 = F1–F12 出音量/亮度；Fn+Esc 切换", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
+            _lblFnNote = Lbl("锁定 = F1–F12 为功能键；解锁 = 音量/亮度；Fn+Esc 切换", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
             p.Controls.Add(_lblFnNote);
 
             // GPU 模式
@@ -556,8 +556,8 @@ namespace MiCtl
 
                 _tglWinKey.Checked = s.WinKeyLocked;
 
-                // Fn 锁（用户 2026-11-26 确认语义：锁定 = F1–F12 是正常功能键；解锁 = F1–F12 出音量/亮度）。
-                // value 对应是推断（0 = 解锁），尚未显式对照；若发现 pill 与实际相反，对调两个分支即可。
+                // Fn 锁（语义与 value 对应均已确认，2026-11-26：pill 显示"已锁定"与 F1 实际行为一致——
+                // 锁定 = F1–F12 是正常功能键；解锁 = F1–F12 出音量/亮度）。
                 if (!s.FnLockValue.HasValue) _pillFnLock.Set("未检测到", Theme.TextDim);
                 else if (s.FnLockValue.Value == 0) _pillFnLock.Set("已解锁", Theme.Orange);
                 else _pillFnLock.Set("已锁定", Theme.Green);
