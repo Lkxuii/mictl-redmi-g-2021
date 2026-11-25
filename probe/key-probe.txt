@@ -1,0 +1,3 @@
+记录时间: 2026-11-26 01:51:11
+  [  3.3s] DN  vk=0xAD VOLUME_MUTE(静音) scan=0xE020 injected=False
+共 1 条按键

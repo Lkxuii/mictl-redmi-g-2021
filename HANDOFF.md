@@ -83,7 +83,9 @@ bitland-mifs-wmi.c      Linux 内核驱动参考副本（第三方，GPL）
 | Fn 锁语义（用户 2026-11-26 确认，纠正了他此前"fn 开 = 媒体键"的说法）：**锁定 = F1–F12 是正常功能键（F1 就是 F1）；解锁 = F1–F12 是媒体键（音量/亮度）** | 用户原话："锁定应该是正常的f1，解锁才是音量" |
 | EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
 | EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
-| **fn11 SET 不能切换 Fn 锁**：SET 0/1 都返回成功，但 12 秒内无 EC 事件 id7、GET 恒为 1、行为无变化 | probe/FnLockProbe.cs → fnlock-probe.txt（提权探针） |
+| **fn11 SET 不能切换 Fn 锁**（已排除）：SET 0/1 与 7 种 payload 形态都返回成功，但无 EC 事件 id7、GET 恒为 1 | probe/FnLockProbe.cs → fnlock-probe.txt；FnLockProbe2.cs → fnlock-probe2.txt |
+| **fn10（"键盘类型"）SET 才是 Fn 锁的实际开关**：payload 1 = 解锁（F1–F12 出音量/亮度，0.2 秒内 EC 推 id7 value 0）、payload 0 = 锁定（无变化则无事件） | probe/FnLockProbe3/4.cs → fnlock-probe3/4.txt；游戏盒子开关实测有效（用户 2026-11-26：游戏盒子里切换时 MiCtl 的 pill 实时跟随） |
+| 游戏盒子的 UI ↔ 服务架构：UI 进程（GamingBox.exe，CEF）注入 window.set_fn_key_status 等方法，经 protobuf 命名管道（PipeClientHander/PipeServerHander）发到常驻服务 GamingBoxHost.exe；小米的硬件访问层是 MiService 服务 + MiServiceDaemon.sys 内核驱动（Fn 切换的实际执行者，IOCTL 协议未深挖） | rev/gb-frontend-channels.txt；GamingBox.exe / GamingBoxHost.exe / MiService.exe 字符串抽取；scan-result.txt |
 | root\WMI 里带方法的类只有 MICommonInterface 一个；游戏盒子封装的 Inventec/Quanta WMI 类（inventec_sync_operation::EnableFnKey 等）在本机不存在——它的 Fn 软件切换通道在这台机器上同样不可用 | root\WMI 全量类枚举（Get-CimClass）；rev/rtti.txt |
 | GPU 模式识别（Radeon 集显不可见 = 独显直连）方向已验证：当前确为独显直连，界面识别一致；混合模式方向未验证（用户未切换过） | 用户确认（2026-11-26）："当前就是独显直连" |
 | 新增监控项都能在本机读到真实值：CPU 负载、GPU 核心频率与显存、内存（使用率 / 已用 / 可用 / 频率）、电池、默认网卡与网速、WiFi、延迟、进程榜 | `probe/sysprobe.txt`（13:48 提权诊断，列出全部传感器）；`probe/appcheck.txt`（普通权限，5 轮） |
@@ -113,7 +115,7 @@ fn9 的一条实际响应（30 字节）：
 
 ### 第二优先：用户点名要、但没做到位的
 
-5. **软件切换 Fn 锁：已验证不可行，不做开关**。fn11 SET 返回成功但不生效（探针实测，见第 4 节）；游戏盒子走的是 Inventec/Quanta WMI 类，本机没有这些类；EC 直写没有可靠偏移、风险高。所以 Fn 锁只有 Fn+Esc 一条切换路，界面保持状态显示（pill + 悬停显示官方解锁键位表）。若将来拿到 EC 偏移或新版 BIOS，再评估。
+5. ~~软件切换 Fn 锁：已验证不可行~~ **已实现（2026-11-26）**。游戏盒子的开关实测有效（用户切换时 MiCtl 的 pill 实时跟随）→ 探针找到真正的通道是 **fn10（"键盘类型"）SET**：payload 1 = 解锁、0 = 锁定（fn11 是误判排除项）。界面 Fn 锁行已改为 ToggleSwitch（AppController.SetFnLock；SET 后 3 秒内等 EC 事件确认，超时回退并提示）；官方解锁键位表在悬停提示里。游戏盒子的架构（UI→protobuf 管道→Host→MiService/MiServiceDaemon.sys）已记录在第 4 节，如需更深挖可从 MiServiceDaemon 的 IOCTL 入手。
 6. **触控板的两层状态已经拆开显示，但没实测。** 界面开关现在只表示并控制设备层（pnputil）；键盘快捷键那一层（EC 事件，启动后没收到过事件时未知）单独用一个"快捷键已锁定"标签提示。原来两层合在一个开关上、取消禁用后会弹回去的问题，在逻辑上不再出现，但没有在真实窗口里验证过。
 7. **游戏盒子在这台机器上到底怎么实现触控板 / Fn 锁 / Win 键锁的切换，没有查清**。前端有 `set_a7_touchpad_status`、`set_a7_fn_key_status`、`set_a7_windows_key_status`、`set_a7_down_key_mode`。固件接口的 fn12（驱动里标为触控板锁）在本机返回不支持。`rev/rtti.txt` 里能看到 `EnableTouchpad` / `DisableFnKey` / `GetDownKeyMode` 等类名，但它们挂在 `inventec_sync_operation` 和 `syncoperation` 两个命名空间下，二进制里没有 Bitland 字样，也没有 Inventec / Quanta 的 WMI 类名——没有证据表明本机走这些类。
 8. **GPU 模式切换是否生效**。固件会接受 fn9 的写入并返回成功，但读不回模式，要重启才知道结果，没试过。从游戏盒子前端代码看，这个功能只对 A7SR 机型开放。界面的提示语已经改成如实表述。

@@ -27,6 +27,7 @@ namespace MiCtl
         public int? WinLockEventValue { get; private set; }     // Win 键锁（EC 侧）
         public bool Started { get; private set; }
         public DateTime LastEventAt { get; private set; }
+        public DateTime LastFnLockEventAt { get; private set; }   // 最近一次 id7 事件到达时间（用于确认软件切换生效）
 
         /// <summary>任何状态事件到达（风扇/触控板/Fn 锁/Win 锁）</summary>
         public event Action StateChanged;
@@ -81,8 +82,9 @@ namespace MiCtl
                             TouchpadEventValue = b[2];
                             stateChanged = true;
                             break;
-                        case 7: // Fn 锁状态（Fn+Esc 切换）
+                        case 7: // Fn 锁状态（Fn+Esc 切换；fn10 SET 也会触发，语义见 MainWindow/交接文档）
                             FnLockEventValue = b[2];
+                            LastFnLockEventAt = DateTime.Now;
                             stateChanged = true;
                             break;
                         case 33: // Win 键锁状态

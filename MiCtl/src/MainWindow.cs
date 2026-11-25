@@ -56,7 +56,8 @@ namespace MiCtl
         private Segmented _segProfiles, _segGpu;
         private ToggleSwitch _tglAuto, _tglTouchpad, _tglWinKey, _tglStartup;
         private Stepper _stpLow, _stpHigh;
-        private StatusPill _pillTouchpadEc, _pillFnLock;
+        private StatusPill _pillTouchpadEc;
+        private ToggleSwitch _tglFnLock;
         private ToolTip _tips;
         private AccentButton _btnGpuApply;
         private Label _lblFnNote, _lblGpuModeNote, _lblStatus;
@@ -370,17 +371,28 @@ namespace MiCtl
             AddDivider(p, M, y + RowH, CW);
 
             y += RowH;
-            p.Controls.Add(Lbl("Fn 锁", Theme.Cn, 13, Theme.TextMain, M, y + 11));
-            _pillFnLock = new StatusPill();
-            _pillFnLock.Location = Theme.P(M + 92, y + 8);
-            _tips.SetToolTip(_pillFnLock,
-                "Fn+Esc 切换（本机固件不支持软件切换）。\n" +
+            string fnTip =
+                "Fn+Esc 或此开关切换（固件 fn10 功能码）。\n" +
                 "解锁时：F1 静音 · F2/F3 音量 · F4/F5 亮度 · F6 投影 · F9 触控板 · F10 键盘灯 · F11 截屏 · F12 插入\n" +
-                "锁定时：F1–F12 为功能键");
-            p.Controls.Add(_pillFnLock);
-            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
-            _tips.SetToolTip(_lblFnNote, _tips.GetToolTip(_pillFnLock));
+                "锁定时：F1–F12 为功能键";
+            p.Controls.Add(Lbl("Fn 锁", Theme.Cn, 13, Theme.TextMain, M, y + 11));
+            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, M + 92, y + 12);
+            _tips.SetToolTip(_lblFnNote, fnTip);
             p.Controls.Add(_lblFnNote);
+            _tglFnLock = new ToggleSwitch();
+            _tglFnLock.Bounds = Theme.R(ToggleRight, y + 7, 44, 24);
+            _tips.SetToolTip(_tglFnLock, fnTip);
+            _tglFnLock.CheckedChanged += delegate
+            {
+                if (_suppress || _app == null) return;
+                if (!_app.SetFnLock(_tglFnLock.Checked))
+                {
+                    MessageBox.Show("Fn 锁切换失败：固件接口没有响应。", "MiCtl",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                ApplyLive();
+            };
+            p.Controls.Add(_tglFnLock);
 
             // GPU 模式
             p.Controls.Add(Lbl("GPU 模式", Theme.Cn, 11, Theme.TextSub, 22, 320));
@@ -564,12 +576,17 @@ namespace MiCtl
 
                 _tglWinKey.Checked = s.WinKeyLocked;
 
-                // Fn 锁（语义与 value 对应均已确认，2026-11-26：pill 显示"已锁定"与 F1 实际行为一致——
-                // 锁定 = F1–F12 是正常功能键；解锁 = F1–F12 出音量/亮度）。
-                if (!s.FnLockValue.HasValue) _pillFnLock.Set("未检测到", Theme.TextDim);
-                else if (s.FnLockValue.Value == 0) _pillFnLock.Set("已解锁", Theme.Orange);
-                else _pillFnLock.Set("已锁定", Theme.Green);
-                _lblFnNote.Left = _pillFnLock.Right + Theme.S(10);
+                // Fn 锁（已对照确认：value 1 = 锁定/F1–F12 功能键，value 0 = 解锁/媒体键）。
+                // 软件切换（fn10）发出后的 3 秒确认窗口内不回写，等 EC 事件到位。
+                bool fnLockOn = s.FnLockValue.HasValue && s.FnLockValue.Value == 1;
+                if (!_app.FnLockPending) _tglFnLock.Checked = fnLockOn;
+                _tglFnLock.Enabled = s.MifsAvailable;
+                if (_app.FnLockFailed)
+                {
+                    _app.ClearFnLockFailed();
+                    MessageBox.Show("Fn 锁切换未生效：固件没有确认状态变化。", "MiCtl",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
 
                 // GPU 模式
                 if (s.GpuMode.HasValue) _gpuModeDetected = s.GpuMode;

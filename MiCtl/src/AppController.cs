@@ -32,6 +32,45 @@ namespace MiCtl
         public bool PingRunning { get { return _pingRunning; } }
         private int _tickIndex;
 
+        // ---- Fn 锁软件切换（fn10，2026-11-26 探针验证：0=锁定/功能键，1=解锁/媒体键）----
+        /// <summary>true = 已发出 fn10 SET，等待 EC 事件确认（3 秒窗口）；期间界面不回写 Fn 锁 toggle</summary>
+        public bool FnLockPending { get; private set; }
+        /// <summary>一次性标志：切换发出后 3 秒内未收到 EC 事件确认（固件未生效）。UI 读后调 ClearFnLockFailed()</summary>
+        public bool FnLockFailed { get; private set; }
+        private DateTime _fnLockPendingSince;
+
+        /// <summary>软件切换 Fn 锁（fn10：0 = 锁定/F1–F12 功能键，1 = 解锁/媒体键）。结果经 EC 事件 id7 确认。</summary>
+        public bool SetFnLock(bool lockOn)
+        {
+            if (!Mifs.Available) return false;
+            bool ok = Mifs.SetFnMode(lockOn ? 0 : 1);
+            if (!ok) return false;
+            FnLockPending = true;
+            FnLockFailed = false;
+            _fnLockPendingSince = DateTime.Now;
+            return true;
+        }
+
+        public void ClearFnLockFailed() { FnLockFailed = false; }
+
+        private void CheckFnLockPending()
+        {
+            if (!FnLockPending) return;
+            if (FanWatcher.LastFnLockEventAt >= _fnLockPendingSince)
+            {
+                // EC 事件确认：状态真的切换了
+                FnLockPending = false;
+                Raise(SensorsUpdated);
+                return;
+            }
+            if ((DateTime.Now - _fnLockPendingSince).TotalSeconds > 3)
+            {
+                FnLockPending = false;
+                FnLockFailed = true;
+                Raise(SensorsUpdated);
+            }
+        }
+
         public MifsClient.Profile? CurrentProfile { get; private set; }
 
         /// <summary>
@@ -147,6 +186,8 @@ namespace MiCtl
                 if (_tickIndex == 1 || _tickIndex % 30 == 1) StartPing();
             }
             catch { }
+
+            CheckFnLockPending();
 
             Raise(SensorsUpdated);
         }

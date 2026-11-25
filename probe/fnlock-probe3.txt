@@ -1,0 +1,29 @@
+MIFS 可用: True
+EC 事件订阅: True  启动缓存 value: (空)
+
+>>> SET fn10 payload [00]，观察 3 秒：
+    SET 返回: True
+    GET fn10 复查: data0=0
+
+>>> SET fn10 payload [01]，观察 3 秒：
+    SET 返回: True
+    ★ [0.2s] EC 事件 id7 -> value 0  （payload [01] 生效！）
+    GET fn10 复查: data0=0
+
+>>> SET fn10 payload [02]，观察 3 秒：
+    SET 返回: True
+    GET fn10 复查: data0=0
+
+>>> SET fn10 payload [00 01]，观察 3 秒：
+    SET 返回: False
+    GET fn10 复查: data0=0
+
+>>> SET fn10 payload [01 00]，观察 3 秒：
+    SET 返回: True
+    GET fn10 复查: data0=0
+
+>>> SET fn10 payload [00 00]，观察 3 秒：
+    SET 返回: True
+    GET fn10 复查: data0=0
+
+结束时事件缓存 value: 0

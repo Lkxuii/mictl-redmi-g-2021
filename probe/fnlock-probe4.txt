@@ -1,0 +1,11 @@
+MIFS 可用: True
+EC 事件订阅: True  启动缓存 value: (空)
+>>> SET fn10 = {0}，观察 8 秒：
+    SET 返回: True
+>>> SET fn10 = {1}，观察 8 秒：
+    SET 返回: True
+    ★ [0.2s] EC 事件 id7 -> value 0
+
+GET fn10 复查: data0=0
+GET fn11 复查: data0=1
+结束时事件缓存 value: 0

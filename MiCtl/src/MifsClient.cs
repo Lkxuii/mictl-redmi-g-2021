@@ -322,6 +322,16 @@ namespace MiCtl
             return Get(fn) != null;
         }
 
+        /// <summary>
+        /// 切换 Fn 锁（fn10 "键盘类型"）。2026-11-26 探针验证：payload 1 = 解锁（F1–F12 出音量/亮度，
+        /// EC 推 id7 value 0）；payload 0 = 锁定（F1–F12 为功能键）。fn11 SET 不生效（勿用）。
+        /// 切换结果经 EC 事件 id7 确认（SET 后约 0.2 秒推送）。
+        /// </summary>
+        public bool SetFnMode(int value)
+        {
+            return Set(Fn.KbdType, new byte[] { (byte)value });
+        }
+
         public void Dispose()
         {
             _inDef = null;
