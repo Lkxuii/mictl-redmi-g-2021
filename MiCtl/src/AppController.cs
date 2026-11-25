@@ -1,5 +1,6 @@
 // 应用协调器 —— 轮询线程：传感器采样 + 档位同步 + 自动切档执行
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace MiCtl
@@ -12,6 +13,24 @@ namespace MiCtl
         public FanSpeedWatcher FanWatcher { get; private set; }
         public WinKeyHook WinHook { get; private set; }
         public MifsClient.FanTempStatus FanStatus { get; private set; }
+
+        /// <summary>触控板在设备层是否被禁用（pnputil 那一层；键盘快捷键那一层走 EC 事件，见 FanSpeedWatcher）</summary>
+        public bool TouchpadDeviceDisabled { get; private set; }
+        /// <summary>开机自启计划任务是否存在。启动后在后台线程读一次，之后由 RefreshDeviceStates() 刷新</summary>
+        public bool StartupEnabled { get; private set; }
+        private bool _startupLoaded;
+
+        // ---- 低频采集（都由轮询线程或线程池执行，界面线程只读）----
+        /// <summary>内存占用前几名的进程（同名合并），每 4 秒刷新</summary>
+        public List<ProcessEntry> Processes { get; private set; }
+        public int ProcessCount { get; private set; }
+        /// <summary>无线连接信息（netsh），每 16 秒刷新</summary>
+        public WifiInfo Wifi { get; private set; }
+        /// <summary>最近一次延迟检测</summary>
+        public PingResult LastPing { get; private set; }
+        private bool _pingRunning;
+        public bool PingRunning { get { return _pingRunning; } }
+        private int _tickIndex;
 
         public MifsClient.Profile? CurrentProfile { get; private set; }
 
@@ -39,11 +58,11 @@ namespace MiCtl
             FanWatcher.Start();
             WinHook = new WinKeyHook();
 
-            // EC 状态事件（触控板/Fn 锁/Win 锁/风扇转速变化）：立即刷新状态并通知 UI
+            // EC 状态事件（触控板/Fn 锁状态变化）：立即刷新状态并通知 UI
             FanWatcher.StateChanged += delegate
             {
-                Raise(ProfileChanged);   // 档位 / Fn 锁等状态
-                Raise(SensorsUpdated);   // 触控板开关 / 风扇转速
+                Raise(ProfileChanged);   // Fn 锁等状态
+                Raise(SensorsUpdated);   // 触控板 EC 状态
             };
 
             if (Mifs.Available)
@@ -70,7 +89,8 @@ namespace MiCtl
 
         private void Tick()
         {
-            if (Sensors.Opened) Sensors.Poll();
+            // 内存、网速不依赖传感器库是否打开，所以总是轮询（Poll 内部自己判断）
+            Sensors.Poll();
 
             // 风扇转速 + 固件上报的温度（fn9 轮询，游戏盒子同源数据）
             if (Mifs.Available)
@@ -92,7 +112,7 @@ namespace MiCtl
                     Raise(ProfileChanged);
                 }
                 // 注：本机 MIFS 固件只响应 fn8 档位 / fn9 风扇温度 / fn10 / fn11（全枚举验证）；
-                //     触控板与 Fn 锁的状态变化由 EC 事件推送，风扇转速不在事件里、只能 fn9 轮询
+                //     Fn 锁状态变化由 EC 事件推送，风扇转速不在事件里、只能 fn9 轮询
 
                 // 自动切档
                 if (Settings.AutoEnabled && CurrentProfile.HasValue)
@@ -115,7 +135,71 @@ namespace MiCtl
                 }
             }
 
+            // 设备层状态：WMI 查询放在后台线程，UI 线程只读属性（要在通知界面之前刷新）
+            RefreshDeviceStates(true);
+
+            // 低频采集：进程每 4 秒、WiFi 每 16 秒、延迟启动后一次之后每分钟（ping 在线程池里做）
+            _tickIndex++;
+            try
+            {
+                if (_tickIndex % 2 == 1) RefreshProcessesNow();
+                if (_tickIndex % 8 == 2) Wifi = SystemInfo.QueryWifi();
+                if (_tickIndex == 1 || _tickIndex % 30 == 1) StartPing();
+            }
+            catch { }
+
             Raise(SensorsUpdated);
+        }
+
+        /// <summary>重新取内存占用前 5 的进程（同名合并）。枚举全部进程约几十毫秒。</summary>
+        public void RefreshProcessesNow()
+        {
+            try
+            {
+                int n;
+                Processes = SystemInfo.TopProcesses(5, out n);
+                ProcessCount = n;
+            }
+            catch { }
+        }
+
+        /// <summary>结束一个进程条目下的全部进程；失败时返回给用户看的原因</summary>
+        public string KillProcesses(ProcessEntry e)
+        {
+            string err = SystemInfo.Kill(e);
+            RefreshProcessesNow();
+            return err;
+        }
+
+        /// <summary>延迟检测（ping 网关与公网），在线程池里跑，完成后发 SensorsUpdated</summary>
+        public void StartPing()
+        {
+            if (_pingRunning) return;
+            _pingRunning = true;
+            string gateway = Sensors != null ? Sensors.GatewayIPv4 : null;
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                PingResult r = SystemInfo.Ping(gateway);
+                LastPing = r;
+                _pingRunning = false;
+                Raise(SensorsUpdated);
+            });
+        }
+
+        /// <summary>
+        /// 刷新触控板设备状态与自启任务状态。
+        /// startupOnlyOnce = true 时只在第一次调用时查询计划任务（轮询线程用），用户切换自启后传 false 立即复查。
+        /// </summary>
+        public void RefreshDeviceStates(bool startupOnlyOnce = false)
+        {
+            try { TouchpadDeviceDisabled = TouchpadControl.IsDisabled(); }
+            catch { }
+            if (!startupOnlyOnce || !_startupLoaded)
+            {
+                _startupLoaded = true;
+                try { StartupEnabled = StartupManager.IsEnabled(); }
+                catch { }
+            }
         }
 
         private double? MaxTemp()
@@ -133,8 +217,8 @@ namespace MiCtl
             bool ok = Mifs.SetProfile(p);
             MifsClient.Profile? now = Mifs.GetProfile();
             if (now.HasValue) CurrentProfile = now.Value;
-            // 手动切换后重置自动防抖计时，避免立刻被自动逻辑改回去
-            _lastAutoChange = DateTime.Now.AddSeconds(-AutoProfile.MinHoldSeconds);
+            // 手动切换后从此刻起重新计 15 秒防抖：这段时间内自动联动不再改动档位
+            _lastAutoChange = DateTime.Now;
             Raise(ProfileChanged);
             Raise(ProfileSwitchResult);
             return ok;

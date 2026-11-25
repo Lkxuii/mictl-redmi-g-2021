@@ -27,3 +27,8 @@ probe/lhm-kernel.cs
 
 # 临时结果
 probe/result-sys.txt
+
+# 生成物与本地目录（2026-11-26）
+*.res
+.zwork/
+__pycache__/

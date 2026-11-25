@@ -1,0 +1,406 @@
+时间: 2026-11-25 13:48:25
+管理员: True
+
+[round 1] [Cpu] AMD Ryzen 7 5800H with Radeon Graphics
+  Load | CPU Core #1 | 57.14
+  Load | CPU Core #2 | 21.43
+  Load | CPU Core #3 | 35.71
+  Load | CPU Core #4 | 14.29
+  Load | CPU Core #5 | 21.43
+  Load | CPU Core #6 | 28.57
+  Load | CPU Core #7 | 38.46
+  Load | CPU Core #8 | 0
+  Load | CPU Core #9 | 0
+  Load | CPU Core #10 | 0
+  Load | CPU Core #11 | 0
+  Load | CPU Core #12 | 0
+  Load | CPU Core #13 | 0
+  Load | CPU Core #14 | 0
+  Load | CPU Core #15 | 0
+  Load | CPU Core #16 | 7.14
+  Load | CPU Total | 14.01
+  Load | CPU Core Max | 57.14
+  Power | Package | 17.79
+  Clock | Cores (Average) | 3348
+  Clock | Cores (Average Effective) | 727
+  Clock | Core #1 | 3868
+  Clock | Core #1 (Effective) | 1709
+  Factor | Core #1 | 38.75
+  Power | Core #1 (SMU) | 3.63
+  Voltage | Core #1 VID | 1.19
+  Clock | Core #2 | 3868
+  Clock | Core #2 (Effective) | 1583
+  Factor | Core #2 | 38.75
+  Power | Core #2 (SMU) | 3.39
+  Voltage | Core #2 VID | 1.18
+  Clock | Core #3 | 3868
+  Clock | Core #3 (Effective) | 1500
+  Factor | Core #3 | 38.75
+  Power | Core #3 (SMU) | 3.15
+  Voltage | Core #3 VID | 1.19
+  Clock | Core #4 | 3094
+  Clock | Core #4 (Effective) | 841
+  Factor | Core #4 | 31
+  Power | Core #4 (SMU) | 1.86
+  Voltage | Core #4 VID | 0.96
+  Clock | Core #5 | 2990
+  Clock | Core #5 (Effective) | 1
+  Factor | Core #5 | 31
+  Power | Core #5 (SMU) | 0.18
+  Voltage | Core #5 VID | 0.96
+  Clock | Core #6 | 2996
+  Clock | Core #6 (Effective) | 1
+  Factor | Core #6 | 31
+  Power | Core #6 (SMU) | 0.17
+  Voltage | Core #6 VID | 0.96
+  Clock | Core #7 | 3007
+  Clock | Core #7 (Effective) | 1
+  Factor | Core #7 | 31
+  Power | Core #7 (SMU) | 0.17
+  Voltage | Core #7 VID | 0.96
+  Clock | Core #8 | 3094
+  Clock | Core #8 (Effective) | 177
+  Factor | Core #8 | 31
+  Power | Core #8 (SMU) | 0.47
+  Voltage | Core #8 VID | 0.96
+  Temperature | Core (Tctl/Tdie) | 55.25
+  Voltage | Core (SVI2 TFN) | 1.55
+  Voltage | SoC (SVI2 TFN) | 1.55
+  Clock | Bus Speed | 99.81
+
+[round 1] [GpuNvidia] NVIDIA GeForce RTX 3060 Laptop GPU
+  Temperature | GPU Core | 45
+  Clock | GPU Core | 1567
+  Clock | GPU Memory | 7501
+  Load | GPU Core | 8
+  Load | GPU Memory Controller | 3
+  Load | GPU Video Engine | 0
+  Load | GPU Bus | 0
+  SmallData | D3D Dedicated Memory Used | 1862.02
+  SmallData | D3D Shared Memory Used | 143.8
+  Load | D3D 3D | 15.13
+  Load | D3D Compute_0 | 0
+  Load | D3D Overlay | 0
+  Load | D3D Video Decode | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0.1
+  Load | D3D Security | 0
+  Load | D3D Video Encode | 0
+  Load | D3D Optical Flow Accelerator 0 | 0
+  Load | D3D Graphics_1 | 0
+  Load | D3D Cuda | 0
+  Load | D3D Compute_1 | 0
+  Load | D3D VR | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Security_1 | 0
+  Temperature | GPU Hot Spot | 48.03
+  SmallData | GPU Memory Total | 6144
+  SmallData | GPU Memory Free | 4139
+  SmallData | GPU Memory Used | 2004
+  Load | GPU Memory | 32.62
+  Power | GPU Package | 25.5
+
+[round 1] [Battery] G16B02W
+  Energy | Designed Capacity | 80000
+  Energy | Fully-Charged Capacity | 65350
+  Level | Degradation Level | 18.31
+  Energy | Remaining Capacity | 65350
+  Level | Charge Level | 100
+  Voltage | Voltage | 12.64
+  Current | Charge/Discharge Current | 0
+  Power | Charge/Discharge Rate | 0
+
+[round 2] [Cpu] AMD Ryzen 7 5800H with Radeon Graphics
+  Load | CPU Core #1 | 30.69
+  Load | CPU Core #2 | 16.83
+  Load | CPU Core #3 | 31.68
+  Load | CPU Core #4 | 19.8
+  Load | CPU Core #5 | 26.73
+  Load | CPU Core #6 | 12.87
+  Load | CPU Core #7 | 14.71
+  Load | CPU Core #8 | 9.71
+  Load | CPU Core #9 | 10.78
+  Load | CPU Core #10 | 7.84
+  Load | CPU Core #11 | 3.96
+  Load | CPU Core #12 | 2
+  Load | CPU Core #13 | 0
+  Load | CPU Core #14 | 0
+  Load | CPU Core #15 | 0
+  Load | CPU Core #16 | 0.98
+  Load | CPU Total | 11.79
+  Load | CPU Core Max | 31.68
+  Power | Package | 13.43
+  Clock | Cores (Average) | 3390
+  Clock | Cores (Average Effective) | 559
+  Clock | Core #1 | 3169
+  Clock | Core #1 (Effective) | 1149
+  Factor | Core #1 | 31.75
+  Power | Core #1 (SMU) | 2.1
+  Voltage | Core #1 VID | 0.98
+  Clock | Core #2 | 3169
+  Clock | Core #2 (Effective) | 1146
+  Factor | Core #2 | 31.75
+  Power | Core #2 (SMU) | 2.17
+  Voltage | Core #2 VID | 0.98
+  Clock | Core #3 | 3868
+  Clock | Core #3 (Effective) | 1010.5
+  Factor | Core #3 | 38.75
+  Power | Core #3 (SMU) | 2
+  Voltage | Core #3 VID | 1.19
+  Clock | Core #4 | 3868
+  Clock | Core #4 (Effective) | 590
+  Factor | Core #4 | 38.75
+  Power | Core #4 (SMU) | 1.17
+  Voltage | Core #4 VID | 1.18
+  Clock | Core #5 | 3868
+  Clock | Core #5 (Effective) | 421
+  Factor | Core #5 | 38.75
+  Power | Core #5 (SMU) | 0.88
+  Voltage | Core #5 VID | 1.19
+  Clock | Core #6 | 3094
+  Clock | Core #6 (Effective) | 112.5
+  Factor | Core #6 | 31
+  Power | Core #6 (SMU) | 0.36
+  Voltage | Core #6 VID | 0.96
+  Clock | Core #7 | 2987
+  Clock | Core #7 (Effective) | 2.5
+  Factor | Core #7 | 31
+  Power | Core #7 (SMU) | 0.16
+  Voltage | Core #7 VID | 0.96
+  Clock | Core #8 | 3094
+  Clock | Core #8 (Effective) | 43
+  Factor | Core #8 | 31
+  Power | Core #8 (SMU) | 0.23
+  Voltage | Core #8 VID | 0.96
+  Temperature | Core (Tctl/Tdie) | 55.75
+  Voltage | Core (SVI2 TFN) | 1.55
+  Voltage | SoC (SVI2 TFN) | 1.55
+  Clock | Bus Speed | 99.81
+
+[round 2] [GpuNvidia] NVIDIA GeForce RTX 3060 Laptop GPU
+  Temperature | GPU Core | 45
+  Clock | GPU Core | 1567
+  Clock | GPU Memory | 7501
+  Load | GPU Core | 18
+  Load | GPU Memory Controller | 4
+  Load | GPU Video Engine | 0
+  Load | GPU Bus | 1
+  SmallData | D3D Dedicated Memory Used | 1898.93
+  SmallData | D3D Shared Memory Used | 147.34
+  Load | D3D 3D | 19.46
+  Load | D3D Compute_0 | 0
+  Load | D3D Overlay | 0
+  Load | D3D Video Decode | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0.25
+  Load | D3D Security | 0
+  Load | D3D Video Encode | 0
+  Load | D3D Optical Flow Accelerator 0 | 0
+  Load | D3D Graphics_1 | 0
+  Load | D3D Cuda | 0
+  Load | D3D Compute_1 | 0
+  Load | D3D VR | 0
+  Load | D3D Copy | 0.93
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Security_1 | 0
+  Temperature | GPU Hot Spot | 48.34
+  SmallData | GPU Memory Total | 6144
+  SmallData | GPU Memory Free | 4102
+  SmallData | GPU Memory Used | 2041
+  Load | GPU Memory | 33.22
+  Power | GPU Package | 26.96
+
+[round 2] [Battery] G16B02W
+  Energy | Designed Capacity | 80000
+  Energy | Fully-Charged Capacity | 65350
+  Level | Degradation Level | 18.31
+  Energy | Remaining Capacity | 65350
+  Level | Charge Level | 100
+  Voltage | Voltage | 12.64
+  Current | Charge/Discharge Current | 0
+  Power | Charge/Discharge Rate | 0
+
+[round 3] [Cpu] AMD Ryzen 7 5800H with Radeon Graphics
+  Load | CPU Core #1 | 31
+  Load | CPU Core #2 | 14
+  Load | CPU Core #3 | 25
+  Load | CPU Core #4 | 16
+  Load | CPU Core #5 | 16
+  Load | CPU Core #6 | 8
+  Load | CPU Core #7 | 17
+  Load | CPU Core #8 | 11
+  Load | CPU Core #9 | 6.06
+  Load | CPU Core #10 | 2.04
+  Load | CPU Core #11 | 0
+  Load | CPU Core #12 | 0
+  Load | CPU Core #13 | 0
+  Load | CPU Core #14 | 0
+  Load | CPU Core #15 | 0
+  Load | CPU Core #16 | 1.01
+  Load | CPU Total | 9.19
+  Load | CPU Core Max | 31
+  Power | Package | 11.25
+  Clock | Cores (Average) | 3260
+  Clock | Cores (Average Effective) | 425
+  Clock | Core #1 | 3668
+  Clock | Core #1 (Effective) | 896.5
+  Factor | Core #1 | 36.75
+  Power | Core #1 (SMU) | 1.55
+  Voltage | Core #1 VID | 1.11
+  Clock | Core #2 | 3668
+  Clock | Core #2 (Effective) | 852
+  Factor | Core #2 | 36.75
+  Power | Core #2 (SMU) | 1.49
+  Voltage | Core #2 VID | 1.11
+  Clock | Core #3 | 3668
+  Clock | Core #3 (Effective) | 777.5
+  Factor | Core #3 | 36.75
+  Power | Core #3 (SMU) | 1.41
+  Voltage | Core #3 VID | 1.11
+  Clock | Core #4 | 3668
+  Clock | Core #4 (Effective) | 613.5
+  Factor | Core #4 | 36.75
+  Power | Core #4 (SMU) | 1.15
+  Voltage | Core #4 VID | 1.11
+  Clock | Core #5 | 2934
+  Clock | Core #5 (Effective) | 213.5
+  Factor | Core #5 | 29.4
+  Power | Core #5 (SMU) | 0.52
+  Voltage | Core #5 VID | 0.93
+  Clock | Core #6 | 2761
+  Clock | Core #6 (Effective) | 1
+  Factor | Core #6 | 29.4
+  Power | Core #6 (SMU) | 0.16
+  Voltage | Core #6 VID | 0.93
+  Clock | Core #7 | 2783
+  Clock | Core #7 (Effective) | 1
+  Factor | Core #7 | 29.4
+  Power | Core #7 (SMU) | 0.15
+  Voltage | Core #7 VID | 0.93
+  Clock | Core #8 | 2934
+  Clock | Core #8 (Effective) | 44.5
+  Factor | Core #8 | 29.4
+  Power | Core #8 (SMU) | 0.22
+  Voltage | Core #8 VID | 0.93
+  Temperature | Core (Tctl/Tdie) | 55.5
+  Voltage | Core (SVI2 TFN) | 1.55
+  Voltage | SoC (SVI2 TFN) | 1.55
+  Clock | Bus Speed | 99.81
+
+[round 3] [GpuNvidia] NVIDIA GeForce RTX 3060 Laptop GPU
+  Temperature | GPU Core | 45
+  Clock | GPU Core | 1567
+  Clock | GPU Memory | 7501
+  Load | GPU Core | 11
+  Load | GPU Memory Controller | 3
+  Load | GPU Video Engine | 0
+  Load | GPU Bus | 0
+  SmallData | D3D Dedicated Memory Used | 1894.98
+  SmallData | D3D Shared Memory Used | 144.66
+  Load | D3D 3D | 15.63
+  Load | D3D Compute_0 | 0
+  Load | D3D Overlay | 0
+  Load | D3D Video Decode | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0.28
+  Load | D3D Security | 0
+  Load | D3D Video Encode | 0
+  Load | D3D Optical Flow Accelerator 0 | 0
+  Load | D3D Graphics_1 | 0
+  Load | D3D Cuda | 0
+  Load | D3D Compute_1 | 0
+  Load | D3D VR | 0
+  Load | D3D Copy | 0.11
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Copy | 0
+  Load | D3D Security_1 | 0
+  Temperature | GPU Hot Spot | 48.41
+  SmallData | GPU Memory Total | 6144
+  SmallData | GPU Memory Free | 4106
+  SmallData | GPU Memory Used | 2037
+  Load | GPU Memory | 33.15
+  Power | GPU Package | 26.16
+
+[round 3] [Battery] G16B02W
+  Energy | Designed Capacity | 80000
+  Energy | Fully-Charged Capacity | 65350
+  Level | Degradation Level | 18.31
+  Energy | Remaining Capacity | 65350
+  Level | Charge Level | 100
+  Voltage | Voltage | 12.64
+  Current | Charge/Discharge Current | 0
+  Power | Charge/Discharge Rate | 0
+
+=== 内存 ===
+使用率 36%  总 32604.5 GB  可用 20800.03 GB  已用 11804.47 GB
+
+=== 性能计数器 ===
+实例: 0,_Total
+  % Processor Utility = 13.82
+  % Processor Time = 14.18
+  Processor Frequency = 3201
+  % of Maximum Frequency = 98
+  % Processor Performance = 108.06
+
+=== 网卡 ===
+以太网 | Ethernet | Down | Realtek PCIe GbE Family Controller
+vgate0 | 53 | Up | Rust Wintun Tunnel Tunnel
+   IPv4 172.30.236.116
+本地连接* 9 | Wireless80211 | Down | Microsoft Wi-Fi Direct Virtual Adapter
+本地连接* 10 | Wireless80211 | Down | Microsoft Wi-Fi Direct Virtual Adapter #2
+WLAN | Wireless80211 | Up | Intel(R) Wi-Fi 6E AX210 160MHz
+   IPv4 192.168.1.146
+   网关 192.168.1.1
+蓝牙网络连接 | Ethernet | Down | Bluetooth Device (Personal Area Network)
+Loopback Pseudo-Interface 1 | Loopback | Up | Software Loopback Interface 1
+   IPv4 127.0.0.1
+
+=== netsh wlan show interfaces ===
+系统上有 1 个接口: 
+
+    名称                   : WLAN
+    描述                   : Intel(R) Wi-Fi 6E AX210 160MHz
+    GUID                   : 6a7296dd-10ab-4792-80e4-488eac6d34d2
+    物理地址               : 60:dd:8e:10:98:f7
+    状态                   : 已连接
+    SSID                   : Nkxuii
+    BSSID                  : 02:03:7f:12:a7:a7
+    网络类型               : 结构
+    无线电类型             : 802.11ax
+    身份验证               : WPA2 - 个人
+    密码                   : CCMP
+    连接模式               : 自动连接
+    信道                   : 48
+    接收速率(Mbps)         : 961
+    传输速率 (Mbps)        : 721
+    信号                   : 90%
+    配置文件               : Nkxuii 
+
+    承载网络状态  : 不可用
+
+=== ping 网关 ===
+  192.168.1.1 -> Success 3 ms
+  192.168.1.1 -> Success 2 ms
+  192.168.1.1 -> Success 4 ms
+  192.168.1.1 -> Success 3 ms
+  223.5.5.5 -> Success 41 ms
+
+=== 进程 ===
+进程数: 291
+  firefox.exe | 406 MB | pid 14972
+  Weixin.exe | 403 MB | pid 2052
+  AutoClaw2.exe | 351 MB | pid 24872
+  AutoClaw2.exe | 341 MB | pid 13968
+  HipsDaemon.exe | 329 MB | pid 2812
+  firefox.exe | 328 MB | pid 18600
+  firefox.exe | 282 MB | pid 15692
+  steamwebhelper.exe | 272 MB | pid 22200
+  explorer.exe | 230 MB | pid 10316
+  WeChatAppEx.exe | 228 MB | pid 14744
+枚举+读取耗时(含上面): 0 ms

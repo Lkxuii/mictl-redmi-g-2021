@@ -1,24 +1,66 @@
-﻿[第 1 次轮询后]
-  界面将显示的温度 : CPU=69°C  GPU=50°C
-  界面将显示的风扇 : 2814 / 2818 RPM
-  固件包原始值     : 风扇A=2814 风扇B=2818 CPU=69°C GPU=50°C
-  传感器库原始值   : CPU=69.3°C  GPU=50°C  GPU负载=4%  GPU功耗=25.3W  CPU功耗=20.1W
+[第 1 次轮询后]
+  界面将显示的温度 : CPU=54°C  GPU=44°C
+  界面将显示的风扇 : 2395 / 2436 RPM
+  固件包原始值     : 风扇A=2395 风扇B=2436 CPU=54°C GPU=44°C
+  CPU              : 温度=54.8°C  负载=18.1%  频率=2949 MHz  功耗=13 W
+  GPU              : 温度=45°C  负载=14%  核心频率=1372 MHz  功耗=22.6 W  显存=1875 / 6144 MB
+  内存             : 35%  已用 11.2 / 31.8 GB  可用 20.7 GB  频率 3200MHz
+  电池             : 100%  功率 0 W  健康度 81.8%
+  网络             : 网卡=WLAN [Intel(R) Wi-Fi 6E AX210 160MHz]  IP=192.168.1.146  网关=192.168.1.1  ↓0 ↑0 KB/s  其它地址=vgate0  172.30.236.116
+  WiFi             : (本轮还没采集)
+  延迟             : 网关 2 ms  公网 36 ms
+  进程             : 302 个  前 5: AutoClaw2.exe 1.18 GB x5, WeChatAppEx.exe 787 MB x11, steamwebhelper.exe 644 MB x7, Weixin.exe 500 MB x5, msedgewebview2.exe 379 MB x6
 [第 2 次轮询后]
-  界面将显示的温度 : CPU=69°C  GPU=51°C
-  界面将显示的风扇 : 2818 / 2818 RPM
-  固件包原始值     : 风扇A=2818 风扇B=2818 CPU=69°C GPU=51°C
-  传感器库原始值   : CPU=69.3°C  GPU=50°C  GPU负载=4%  GPU功耗=25W  CPU功耗=16.7W
+  界面将显示的温度 : CPU=54°C  GPU=45°C
+  界面将显示的风扇 : 2401 / 2436 RPM
+  固件包原始值     : 风扇A=2401 风扇B=2436 CPU=54°C GPU=45°C
+  CPU              : 温度=54.4°C  负载=16.8%  频率=3191 MHz  功耗=11.8 W
+  GPU              : 温度=45°C  负载=12%  核心频率=1372 MHz  功耗=22.1 W  显存=1861 / 6144 MB
+  内存             : 35%  已用 11.2 / 31.8 GB  可用 20.7 GB  频率 3200MHz
+  电池             : 100%  功率 0 W  健康度 81.8%
+  网络             : 网卡=WLAN [Intel(R) Wi-Fi 6E AX210 160MHz]  IP=192.168.1.146  网关=192.168.1.1  ↓1.6 ↑3.5 KB/s  其它地址=vgate0  172.30.236.116
+  WiFi             : 已连接  SSID=Nkxuii  信号=90%  802.11ax  961 Mbps
+  延迟             : 网关 2 ms  公网 36 ms
+  进程             : 302 个  前 5: AutoClaw2.exe 1.18 GB x5, WeChatAppEx.exe 787 MB x11, steamwebhelper.exe 644 MB x7, Weixin.exe 500 MB x5, msedgewebview2.exe 379 MB x6
 [第 3 次轮询后]
-  界面将显示的温度 : CPU=69°C  GPU=50°C
-  界面将显示的风扇 : 2818 / 2814 RPM
-  固件包原始值     : 风扇A=2818 风扇B=2814 CPU=69°C GPU=50°C
-  传感器库原始值   : CPU=69.4°C  GPU=50°C  GPU负载=4%  GPU功耗=25.1W  CPU功耗=17.6W
+  界面将显示的温度 : CPU=54°C  GPU=45°C
+  界面将显示的风扇 : 2395 / 2436 RPM
+  固件包原始值     : 风扇A=2395 风扇B=2436 CPU=54°C GPU=45°C
+  CPU              : 温度=54.3°C  负载=17.8%  频率=3028 MHz  功耗=12.3 W
+  GPU              : 温度=45°C  负载=13%  核心频率=1372 MHz  功耗=22.3 W  显存=1856 / 6144 MB
+  内存             : 35%  已用 11.2 / 31.8 GB  可用 20.7 GB  频率 3200MHz
+  电池             : 100%  功率 0 W  健康度 81.8%
+  网络             : 网卡=WLAN [Intel(R) Wi-Fi 6E AX210 160MHz]  IP=192.168.1.146  网关=192.168.1.1  ↓4 ↑13 KB/s  其它地址=vgate0  172.30.236.116
+  WiFi             : 已连接  SSID=Nkxuii  信号=90%  802.11ax  961 Mbps
+  延迟             : 网关 2 ms  公网 36 ms
+  进程             : 302 个  前 5: AutoClaw2.exe 1.18 GB x5, WeChatAppEx.exe 787 MB x11, steamwebhelper.exe 644 MB x7, Weixin.exe 500 MB x5, msedgewebview2.exe 380 MB x6
 [第 4 次轮询后]
-  界面将显示的温度 : CPU=69°C  GPU=50°C
-  界面将显示的风扇 : 2818 / 2814 RPM
-  固件包原始值     : 风扇A=2818 风扇B=2814 CPU=69°C GPU=50°C
-  传感器库原始值   : CPU=69.5°C  GPU=50°C  GPU负载=4%  GPU功耗=25W  CPU功耗=18.1W
+  界面将显示的温度 : CPU=54°C  GPU=45°C
+  界面将显示的风扇 : 2395 / 2439 RPM
+  固件包原始值     : 风扇A=2395 风扇B=2439 CPU=54°C GPU=45°C
+  CPU              : 温度=53.9°C  负载=15.9%  频率=3130 MHz  功耗=11.9 W
+  GPU              : 温度=45°C  负载=13%  核心频率=1372 MHz  功耗=22.2 W  显存=1864 / 6144 MB
+  内存             : 35%  已用 11.2 / 31.8 GB  可用 20.7 GB  频率 3200MHz
+  电池             : 100%  功率 0 W  健康度 81.8%
+  网络             : 网卡=WLAN [Intel(R) Wi-Fi 6E AX210 160MHz]  IP=192.168.1.146  网关=192.168.1.1  ↓0.7 ↑2.1 KB/s  其它地址=vgate0  172.30.236.116
+  WiFi             : 已连接  SSID=Nkxuii  信号=90%  802.11ax  961 Mbps
+  延迟             : 网关 2 ms  公网 36 ms
+  进程             : 302 个  前 5: AutoClaw2.exe 1.18 GB x5, WeChatAppEx.exe 787 MB x11, steamwebhelper.exe 644 MB x7, Weixin.exe 500 MB x5, msedgewebview2.exe 380 MB x6
+[第 5 次轮询后]
+  界面将显示的温度 : CPU=53°C  GPU=45°C
+  界面将显示的风扇 : 2395 / 2436 RPM
+  固件包原始值     : 风扇A=2395 风扇B=2436 CPU=53°C GPU=45°C
+  CPU              : 温度=53.8°C  负载=18.7%  频率=3162 MHz  功耗=12.2 W
+  GPU              : 温度=45°C  负载=14%  核心频率=1372 MHz  功耗=22.9 W  显存=1867 / 6144 MB
+  内存             : 35%  已用 11.2 / 31.8 GB  可用 20.7 GB  频率 3200MHz
+  电池             : 100%  功率 0 W  健康度 81.8%
+  网络             : 网卡=WLAN [Intel(R) Wi-Fi 6E AX210 160MHz]  IP=192.168.1.146  网关=192.168.1.1  ↓1.9 ↑3 KB/s  其它地址=vgate0  172.30.236.116
+  WiFi             : 已连接  SSID=Nkxuii  信号=90%  802.11ax  961 Mbps
+  延迟             : 网关 2 ms  公网 36 ms
+  进程             : 302 个  前 5: AutoClaw2.exe 1.18 GB x5, WeChatAppEx.exe 787 MB x11, steamwebhelper.exe 644 MB x7, Weixin.exe 500 MB x5, msedgewebview2.exe 380 MB x6
 
 固件接口可用: True
-当前档位     : FullSpeed
+当前档位     : Quiet
 事件监听已启动: True
+开机自启任务 : False
+触控板设备禁用: False

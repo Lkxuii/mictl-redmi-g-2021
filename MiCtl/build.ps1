@@ -37,6 +37,19 @@ if (-not (Test-Path (Join-Path $libs 'LibreHardwareMonitorLib.dll'))) {
 $csc = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path $csc)) { throw "csc.exe 不存在" }
 
+# ---- Win32 资源（图标 + 版本信息 + manifest），全部编译期嵌入 ----
+# 为什么不用"编译后再改 exe"（UpdateResource）：本机的火绒会拦截"进程改写可执行文件"
+# （拒绝访问），新出现的 exe 还会被实时监控按 Backdoor/Steam 自动隔离。
+# .res 由 python 生成（tools/make_res.py）；python 不可用时退回纯 manifest。
+$resArg = $null
+try {
+    $py = (Get-Command python -ErrorAction Stop).Source
+    $res = Join-Path $root 'tools\app.res'
+    & $py (Join-Path $root 'tools\make_res.py') $res '1.1.0.0' (Join-Path $root 'assets\app.ico') (Join-Path $src 'app.manifest') | Write-Output
+    if ((Test-Path $res) -and $LASTEXITCODE -eq 0) { $resArg = '/win32res:' + $res }
+} catch { }
+if (-not $resArg) { Write-Output '警告：python 不可用，跳过图标与版本信息（只有 manifest）' }
+
 $srcFiles = @(Get-ChildItem $src -Filter *.cs | ForEach-Object { $_.FullName })
 
 $args = New-Object System.Collections.Generic.List[string]
@@ -45,7 +58,7 @@ $args.Add('/target:winexe')
 $args.Add('/platform:anycpu')
 $args.Add('/optimize+')
 $args.Add('/out:' + (Join-Path $out 'MiCtl.exe'))
-$args.Add('/win32manifest:' + (Join-Path $src 'app.manifest'))
+if ($resArg) { $args.Add($resArg) } else { $args.Add('/win32manifest:' + (Join-Path $src 'app.manifest')) }
 $args.Add('/r:' + (Join-Path $libs 'LibreHardwareMonitorLib.dll'))
 $args.Add('/r:System.Management.dll')
 $args.Add('/r:System.Windows.Forms.dll')

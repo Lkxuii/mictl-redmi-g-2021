@@ -1,6 +1,7 @@
-// 托盘上下文 —— NotifyIcon + 深色右键菜单 + 图标动态绘制
+// 托盘上下文 —— NotifyIcon + 深色右键菜单 + 图标动态绘制（按 DPI）
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace MiCtl
@@ -32,6 +33,14 @@ namespace MiCtl
 
         private ToolStripMenuItem _miQuiet, _miBalanced, _miFull, _miAuto;
 
+        [DllImport("user32.dll")]
+        private static extern bool DestroyIcon(IntPtr handle);
+
+        // 只用来把后台线程的回调投递到 UI 线程（NotifyIcon / 菜单项都不是 Control）
+        private readonly Control _sync = new Control();
+        // GetHicon 创建的句柄：Icon.FromHandle 只是包一层，Dispose 不会释放它
+        private IntPtr _hIcon;
+
         public TrayContext(AppController app)
         {
             _app = app;
@@ -41,6 +50,7 @@ namespace MiCtl
             menu.BackColor = Theme.Card;
             menu.ForeColor = Theme.TextMain;
             menu.ShowImageMargin = false;
+            menu.Font = Theme.F(Theme.Cn, 12.5f);
 
             _miQuiet = Item("静谧模式", delegate { Switch(MifsClient.Profile.Quiet); });
             _miBalanced = Item("均衡模式", delegate { Switch(MifsClient.Profile.Balanced); });
@@ -86,13 +96,29 @@ namespace MiCtl
             RefreshMenuChecks();
             RefreshTooltip();
 
-            _app.SensorsUpdated += delegate { RefreshTooltip(); };
+            // 确保投递用的句柄已创建；之后所有刷新都回到 UI 线程执行
+            IntPtr keep = _sync.Handle;
+            GC.KeepAlive(keep);
+            _app.SensorsUpdated += delegate { OnUi(RefreshTooltip); };
             _app.ProfileChanged += delegate
             {
-                RefreshMenuChecks();
-                RefreshIcon();
-                RefreshTooltip();
+                OnUi(delegate
+                {
+                    RefreshMenuChecks();
+                    RefreshIcon();
+                    RefreshTooltip();
+                });
             };
+        }
+
+        private void OnUi(Action a)
+        {
+            try
+            {
+                if (_sync.IsHandleCreated && !_sync.IsDisposed) _sync.BeginInvoke(a);
+                else a();
+            }
+            catch { }
         }
 
         private static ToolStripMenuItem Item(string text, EventHandler onClick)
@@ -144,11 +170,13 @@ namespace MiCtl
 
         private void RefreshIcon()
         {
-            try { _icon.Icon.Dispose(); } catch { }
+            IntPtr old = _hIcon;
             _icon.Icon = MakeIcon(_app.CurrentProfile ?? MifsClient.Profile.Balanced);
+            // 托盘已复制图标数据，旧句柄可以释放
+            if (old != IntPtr.Zero) DestroyIcon(old);
         }
 
-        // 运行时绘制托盘图标：档位颜色圆点，自动联动时外加圆环
+        // 运行时绘制托盘图标：档位颜色圆点，自动联动时外加圆环；尺寸随 DPI 缩放，避免被系统放大发虚
         private Icon MakeIcon(MifsClient.Profile p)
         {
             Color c;
@@ -159,20 +187,23 @@ namespace MiCtl
                 case MifsClient.Profile.FullSpeed: c = Theme.Red; break;
                 default: c = Color.FromArgb(158, 158, 158); break;
             }
-            using (Bitmap bmp = new Bitmap(16, 16))
+            int size = Math.Max(16, Theme.S(16));
+            float k = size / 16f;
+            using (Bitmap bmp = new Bitmap(size, size))
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
                 using (SolidBrush b = new SolidBrush(c))
-                    g.FillEllipse(b, 2, 2, 12, 12);
+                    g.FillEllipse(b, 2 * k, 2 * k, 12 * k, 12 * k);
                 if (_app.Settings.AutoEnabled)
-                using (Pen pen = new Pen(Color.White, 1.6f))
-                    g.DrawEllipse(pen, 1, 1, 14, 14);
-                using (Font f = new Font("Segoe UI", 7f, FontStyle.Bold))
+                using (Pen pen = new Pen(Color.White, 1.6f * k))
+                    g.DrawEllipse(pen, 1 * k, 1 * k, 14 * k, 14 * k);
+                using (Font f = new Font("Segoe UI", 7f * k, FontStyle.Bold, GraphicsUnit.Pixel))
                 using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-                    g.DrawString("M", f, Brushes.White, new RectangleF(0, 0, 16, 16), sf);
-                return Icon.FromHandle(bmp.GetHicon());
+                    g.DrawString("M", f, Brushes.White, new RectangleF(0, 0, size, size), sf);
+                _hIcon = bmp.GetHicon();
+                return Icon.FromHandle(_hIcon);
             }
         }
 
@@ -188,6 +219,7 @@ namespace MiCtl
         {
             _icon.Visible = false;
             _icon.Dispose();
+            if (_hIcon != IntPtr.Zero) { DestroyIcon(_hIcon); _hIcon = IntPtr.Zero; }
             Application.Exit();
         }
     }

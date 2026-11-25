@@ -80,7 +80,7 @@ namespace MiCtl
 
         public static class Fn
         {
-            public const byte PerMode = 8;          // 性能档位: 0=均衡 1=性能 2=静谧 3=极速
+            public const byte PerMode = 8;          // 性能档位：固件真实映射 2=静谧 1=均衡 0/3=极速（见 Profile 枚举，勿按字面序理解）
             public const byte GpuMode = 9;          // 本机 GET 返回的是风扇/温度状态（见 GetFanTempStatus）；SET 的定义是 GPU 模式切换（未验证）
             public const byte KbdType = 10;
             public const byte FnLock = 11;          // 本机读取恒为 1，不是 Fn 锁状态；Fn 锁状态在 EC 事件 id 7

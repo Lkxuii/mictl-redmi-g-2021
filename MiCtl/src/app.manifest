@@ -17,4 +17,10 @@
       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
     </application>
   </compatibility>
+  <!-- 系统 DPI 感知：150% 缩放下由程序自己按物理像素绘制，不再被系统位图拉伸（否则文字和线条发虚） -->
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+  </application>
 </assembly>

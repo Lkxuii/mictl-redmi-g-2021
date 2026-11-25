@@ -11,8 +11,15 @@
 | 风扇转速 | 固件接口 fn9 轮询（每 2 秒） | 实测：与游戏盒子同源数据 |
 | CPU / GPU 温度 | 固件接口 fn9 轮询 | 实测：CPU 值随满载变化，GPU 值与 nvidia-smi 逐秒一致；CPU 值与 PawnIO/SMN 独立读数一致（±0.5°C） |
 | GPU 负载 / 功耗 | NVML（经 LibreHardwareMonitorLib） | 实测有数值 |
-| CPU 功耗 | LibreHardwareMonitorLib + PawnIO | 实测有数值（16~20W，需安装 PawnIO） |
-| 网速 | 网卡计数差分 | 实测有数值 |
+| GPU 核心频率 / 显存 | NVML（`GPU Core` 时钟、`GPU Memory Used/Total`） | 实测：1567 MHz、2066 / 6144 MB；频率与游戏盒子监控页显示的数值一致 |
+| CPU 负载 | 传感器库 `CPU Total`（不需要内核驱动） | 实测：随负载变化（9.6%~16.3%） |
+| CPU 频率 | 传感器库 `Cores (Average)`（需要内核驱动） | 提权诊断（13:48）中有值 3.3~3.4 GHz；**新版程序接入后未在提权下实测** |
+| CPU 功耗 | LibreHardwareMonitorLib + PawnIO | 实测有数值（14~25W），重启电脑后复测仍可读。需安装 PawnIO |
+| 内存使用率 / 已用 / 可用 / 频率 | `GlobalMemoryStatusEx` + WMI `Win32_PhysicalMemory` | 实测：37%、12 / 31.8 GB、3200MHz |
+| 电池电量 / 充放电功率 / 健康度 | 传感器库 Battery 硬件 | 实测：100%、健康度 81.7% |
+| 网速 | 真正上网的那块网卡的计数差分（有 IPv4 网关、非虚拟） | 实测有数值；选中 WLAN 而非 TUN 虚拟网卡 |
+| 网卡 / 接入点 / 本地 IP / 网关延迟 / 公网延迟 | `NetworkInterface`、`netsh wlan show interfaces`、ping | 实测：WLAN、SSID Nkxuii、信号 90%、192.168.1.146、网关 2 ms、公网 35 ms |
+| 进程数 / 内存占用前 5 / 结束进程 / 打开任务管理器 | `Process.GetProcesses()`（同名合并，排除系统关键进程） | 榜单实测有值；**结束进程未实测** |
 | 档位跟随（游戏盒子 / 键盘切换后同步） | 轮询 fn8 | 数据层实测，界面未目视确认 |
 | 触控板 / Fn 锁状态跟随键盘快捷键 | EC 事件 id 6 / 7 | 事件实测能收到；Fn 锁"开/关"的映射**未独立验证** |
 | 禁用触控板（界面开关） | pnputil 禁用设备 | **未实测** |
@@ -21,8 +28,9 @@
 | GPU 模式识别 | 集显是否可见 | 推断，未实测 |
 | GPU 模式切换 | 固件接口 fn9 SET | **未实测**：固件接受指令，是否真的切换未知 |
 | 开机自启 | 计划任务 | **未实测** |
+| 界面（自绘控件，系统 DPI 感知） | `Theme.cs` / `Controls.cs` / `UiState.cs` | 离屏渲染的 150% 与 100% 缩放画面已目视检查；**真实窗口待目视** |
 
-界面控件本身没有被自动化验证过：MiCtl 以管理员权限运行，非提权进程的 UI Automation 会被 Windows 拦截。
+界面可以在屏幕外离屏渲染成 PNG 来检查（`pwsh -File preview.ps1`，与屏幕渲染逐像素一致）。MiCtl 以管理员权限运行，非提权进程的 UI Automation 和截图都会被 Windows 拦截，所以真实窗口的显示效果只能请用户目视。
 
 ## 硬件接口（本机实测）
 
@@ -61,21 +69,53 @@
 
 - 需要管理员权限（固件接口的写操作）。
 - 温度、转速、档位、GPU 负载/功耗都**不需要内核驱动**。
-- CPU 功耗需要 [PawnIO](https://github.com/namazso/PawnIO.Setup/releases) 2.1.0（装完重启 MiCtl）。没有它其余功能不受影响，只是 CPU 功耗显示 "--"。
+- 只有 CPU 功耗需要 [PawnIO](https://github.com/namazso/PawnIO.Setup/releases) 2.1.0。没有它其余功能不受影响，只是界面不显示 CPU 功耗。实测：安装后重启电脑，驱动仍自动加载，功耗读数正常。
 
 ### PawnIO 安装注意（踩过的坑）
 
 - **2.2.0 的安装包有缺陷**：只部署 `PawnIO.cat` / `pawnio.inf`，没有 `PawnIO.sys`，装完驱动无法启动。用 **2.1.0**。
-- 安装前不要执行 `sc delete PawnIO`：服务处于"标记删除"状态时，新装的 `AddService` 会失败（错误 0x430），且要重启才能恢复。本仓库的 `install-pawnio-clean.ps1` 是验证过可用的安装+验证脚本。
+- 安装前不要执行 `sc delete PawnIO`：服务处于"标记删除"状态时，新装的 `AddService` 会失败（错误 `0x430`）。
+- **`sc query` 显示 RUNNING 不能说明安装成功**：驱动只要加载过就会留在内存里直到重启，即使设备根本没装上。要确认的是 `pnputil /enum-devices` 里有 `ROOT\PAWNIO` 且状态为已启动，`C:\Windows\INF\setupapi.dev.log` 的新段落里没有 `!!!` 行，并且重启电脑后仍能读到数据。
+- 仓库根目录的 `install-pawnio-clean.ps1` 是验证过可用的安装脚本。用之前要把 2.1.0 的 `PawnIO_setup_210.exe` 放到脚本同级目录，并改掉脚本里的绝对路径。`install-pawnio210.ps1` 是会导致安装失败的旧脚本，不要用。
 - WinRing0 在这台机器上不可用：`StartService` 返回 `0x5AA`（驱动被系统拦截），所以 LibreHardwareMonitor 0.9.4 及更早的内嵌 WinRing0 路径全部无效，必须用 0.9.6 + PawnIO。
 
 ## 配置
 
 `%LOCALAPPDATA%\MiCtl\config.json`：`{"auto":true,"low":65,"high":78}`
 
+## 界面结构
+
+主窗口只读一份 `UiState` 快照、只通过 `AppController` 的公开方法执行动作；`AppController` 为 `null` 时就是预览模式。
+
+- `Theme.cs`：配色、DPI 缩放（`Theme.S()`，所有布局常量按 96 DPI 逻辑像素书写）、字体缓存、GDI+ 辅助。
+- `Controls.cs`：自绘控件。温度环（`GaugeRing`）、滑动分段（`Segmented`）、页签条（`TabStrip`）、开关、状态标签、步进器、按钮。
+- `MainWindow.cs`：布局与绑定。
+  - 常驻的仪表卡片：CPU、GPU、内存三个环；下面 CPU、GPU 各一行（负载 · 频率 · 功耗 · 风扇）。
+  - 页签分三页，窗口高度随页签变化：**控制**（性能档位、温度自动联动、快捷控制、GPU 模式、开机自启）、**系统**（内存与电池概况、内存占用前 5 的进程、打开任务管理器）、**网络**（上下行速率、网卡、接入点、本地 IP、延迟、其它地址）。
+- `SystemInfo.cs`：进程榜（同名合并、排除系统关键进程）、结束进程、WiFi 信息、延迟检测。
+
+设计约定：橙色只表示状态或可以点的动作；档位分段的选中色就是档位色；设置项的选中块用中性灰（选择不等于生效，要点"应用"）；彩色面上的文字用深色；实时数值用等宽字体；分隔线固定 1 物理像素。
+
+对照对象是小米游戏盒子（Mi Gaming Box）的"监控器"页：三环、每个硬件一行的数据、进程榜与网络卡片都对齐了；游戏盒子没有的温度自动联动、触控板 / Win 键 / Fn 锁控制、GPU 模式保留。两处有意的不同：网速只算真正上网的网卡（游戏盒子把 TUN 代理虚拟网卡当成了"网卡类型"）；进程榜排除系统关键进程。
+
+程序在 `app.manifest` 里声明为系统 DPI 感知。没有这条声明时，Windows 会把整个窗口位图拉伸到屏幕缩放比例，文字和线条全部发虚。
+
 ## 编译
 
 ```powershell
 pwsh -File build.ps1
 # 产物：out\MiCtl.exe（依赖 libs\ 下的 LibreHardwareMonitorLib 0.9.6 及其配套 DLL）
+#   带应用图标、版本信息（1.1.0.0）和 manifest，全部编译期由 tools/make_res.py 生成的
+#   .res 嵌入（需要 python；没有 python 时退回纯 manifest，无图标与版本信息）
+
+# 界面离屏预览（不连硬件）：渲染 out\ui-preview-<sample|empty>-<control|system|network>-<scale>x.png
+pwsh -File preview.ps1 -Scale 1.5 -Mode sample -Page all
+
+# 部署新版：等你在托盘退出 MiCtl → 编译 → 以管理员身份启动（弹一次 UAC）
+pwsh -File deploy.ps1
+
+# 或者（需要管理员权限运行本脚本）：直接结束运行中的实例、编译、启动
+pwsh -File restart.ps1
 ```
+
+运行中的 `out\MiCtl.exe` 被系统锁定，重新编译前必须先结束进程；MiCtl 以管理员运行，普通权限结束不了。`restart.ps1` 用提权脚本结束它；本机的火绒会拦截这种"提权运行脚本 + 结束进程"的组合，所以首选 `deploy.ps1`。

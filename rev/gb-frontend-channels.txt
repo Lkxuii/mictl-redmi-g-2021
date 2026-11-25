@@ -1,0 +1,95 @@
+file: C:\Program Files (x86)\Timi Personal Computing\GamingBox\1.4.0.851\dist\main.js
+length: 635693
+
+=== set_a7_fn_key_status ===
+--- @ 58366
+tTouchPadStatus=function(e){i()?window.set_a7_touchpad_status(e):window.set_touchpad_status(e)},t.getFnStatus=function(){i()?window.get_a7_fn_key_status():window.get_fn_key_status()},t.setFnStatus=function(e){i()?window.set_a7_fn_key_status(e):window.set_fn_key_status(e)},t.getGraphicMode=function(){a()&&window.get_a7sr_graphic_mode()},t.setGraphicMode=function(e){a()&&window.set_a7sr_graphic_mode(Number(e))},t.getWindowsKeyStatus=function(){i()?window.get_a7_windows_key_status():window.get_windows_key_status()},t.
+
+=== kill_process ===
+--- @ 387484
+u=n(15),A=n(52);t.TaskMessageBox=e=>{const t=c.useRef(null),[n,r]=c.useState(!1),[o,i]=c.useState(0),[f,d]=c.useState(""),p=c.useCallback((e,n)=>{t.current.open(),d(n),i(e)},[n]),g=c.useCallback(()=>{var e;e=o,gaming_os.kill_process(e,e=>console),t.current.close()},[o]);return s.createElement(l.CssMessageTable,null,s.createElement("ul",null,s.createElement("li",{className:"line-first"},s.createElement("div",null,s.createElement(a.Icon,{name:"system"}),"系统    | 进程数 ",e.processNum),s.createElement("div",{onClick:()=>
+
+=== cpu_usage ===
+--- @ 357905
+er_gpu_clock_speed((function(e){let t=JSON.parse(e);4294967295===t.gpu_clock_speed?t.gpu_clock_speed="N/A":t.gpu_clock_speed=Math.ceil(Math.round(t.gpu_clock_speed/10)/100),L(t.gpu_clock_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_use
+--- @ 357952
+e(e);4294967295===t.gpu_clock_speed?t.gpu_clock_speed="N/A":t.gpu_clock_speed=Math.ceil(Math.round(t.gpu_clock_speed/10)/100),L(t.gpu_clock_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_used),R(t.mem_usage),t=null})),window.register_net
+
+=== gpu_usage ===
+--- @ 357989
+.gpu_clock_speed="N/A":t.gpu_clock_speed=Math.ceil(Math.round(t.gpu_clock_speed/10)/100),L(t.gpu_clock_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_used),R(t.mem_usage),t=null})),window.register_network_adapter_ip((function(e){let t=JS
+--- @ 358043
+h.round(t.gpu_clock_speed/10)/100),L(t.gpu_clock_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_used),R(t.mem_usage),t=null})),window.register_network_adapter_ip((function(e){let t=JSON.parse(e);ue(w.default(t)),t=null})),window.register
+--- @ 358069
+10)/100),L(t.gpu_clock_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_used),R(t.mem_usage),t=null})),window.register_network_adapter_ip((function(e){let t=JSON.parse(e);ue(w.default(t)),t=null})),window.register_cpu_temperature_changed((
+--- @ 358089
+ck_speed),t=null})),window.register_cpu_usage((function(e){let t=JSON.parse(e);j(t.cpu_usage),t=null})),window.register_gpu_usage((function(e){let t=JSON.parse(e);parseInt(t.gpu_usage)>=0&&parseInt(t.gpu_usage)<=100?P(t.gpu_usage):P(0),t=null})),window.register_physicalMemory((function(e){let t=JSON.parse(e);F(t.mem_avail),z(t.mem_used),R(t.mem_usage),t=null})),window.register_network_adapter_ip((function(e){let t=JSON.parse(e);ue(w.default(t)),t=null})),window.register_cpu_temperature_changed((function(e){let t=JS
+
+=== frequency ===
+--- @ 115529
+emScope|itemType|itemID|itemRef|on|results|security|unselectable|accentHeight|accumulate|additive|alignmentBaseline|allowReorder|alphabetic|amplitude|arabicForm|ascent|attributeName|attributeType|autoReverse|azimuth|baseFrequency|baselineShift|baseProfile|bbox|begin|bias|by|calcMode|capHeight|clip|clipPathUnits|clipPath|clipRule|colorInterpolation|colorInterpolationFilters|colorProfile|colorRendering|contentScriptType|contentStyleType|cursor|cx|cy|d|decelerate|descent|diffuseConstant|direction|display|divisor|domin
+
+=== ssid ===
+--- @ 114314
+alueLink|accept|acceptCharset|accessKey|action|allow|allowUserMedia|allowPaymentRequest|allowFullScreen|allowTransparency|alt|async|autoComplete|autoPlay|capture|cellPadding|cellSpacing|challenge|charSet|checked|cite|classID|className|cols|colSpan|content|contentEditable|contextMenu|controls|controlsList|coords|crossOrigin|data|dateTime|decoding|default|defer|dir|disabled|disablePictureInPicture|download|draggable|encType|form|formAction|formEncType|formMethod|formNoValidate|formTarget|frameBorder|headers|height|hi
+--- @ 318197
+or, product name is null"),setTimeout((function(){j(!0)}),5e3))}))}),5e3)};return p.useEffect(()=>(window.addEventListener("repair_event",D,!1),()=>{window.removeEventListener("repair_event",D)}),[]),l.createElement(s.CssSidebar,null,l.createElement("section",{className:h},l.createElement("div",{className:m},l.createElement("div",{className:b}),l.createElement("div",{className:v},l.createElement("p",null,"小米游戏盒子"),l.createElement("p",null,"Mi Gaming Box")))),l.createElement("section",{className:C},l.createElement("
+--- @ 319992
+"},l.createElement(u.Icon,{name:"setting"}),"设置")))}},function(e,t,n){"use strict";var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0}),t.CssSidebar=void 0;const o=r(n(1)),i=n(40),a=r(n(130)),l=o.default.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: ${i.StyleConstant.SIDEBAR.WIDTH};
+  height: 100%;
+  background: ${i.StyleConstant.SIDEBAR.BACKGROUND};
+  cursor: default;
+  .logo-section {
+    padding: 40px 20px;
+    f
+--- @ 322572
+dden;
+      border-radius: 5px;
+      background-color: rgba(0, 0, 0, 0);
+    }
+    &::-webkit-scrollbar-thumb {
+     
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0);
+    }
+  } 
+`;t.CssSidebar=l},function(e,t,n){"use strict";n.r(t),t.default="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAATNJREFUSA3tVTsOwjAMbRATXAGxsnMEBCMD12DgOpwCIcTOPdgZuAAr5b2oD7khQdCmAxKWXCf+vNiOq7iiorIsF1iuwCOwq9SNhXNu2Wc0gOcQm8ZIicBepWfG2clnDlS2whPL0bqtVOaSbfFq8Z2A6oT
+--- @ 355764
+;a(t.ac),0===t.ac&&E.productIsA7Series()&&r===C.FAST&&qe(C.NORMAL)},[r]),[De,Le]=d.useState({});const Qe=d.useCallback((function(e){let t=JSON.parse(e);ee(t.adapter_name),"{}"!==JSON.stringify(De)&&!0!==De.connect||ne(t.ssid_name),clearTimeout(B),B=setTimeout((function(){ee(""),ne("")}),3e3),t=null}),[De,ce]);d.useEffect((function(){window.register_network_adapter_ssid(Qe)}),[De]);const[Fe,Ye]=d.useState(""),[ze,Ge]=d.useState(""),[Ue,Je]=d.useState("");const[He,Ze]=d.useState(!1),Ke=E.productIsDiablo(),We=E.produc
+--- @ 355911
+e(e);ee(t.adapter_name),"{}"!==JSON.stringify(De)&&!0!==De.connect||ne(t.ssid_name),clearTimeout(B),B=setTimeout((function(){ee(""),ne("")}),3e3),t=null}),[De,ce]);d.useEffect((function(){window.register_network_adapter_ssid(Qe)}),[De]);const[Fe,Ye]=d.useState(""),[ze,Ge]=d.useState(""),[Ue,Je]=d.useState("");const[He,Ze]=d.useState(!1),Ke=E.productIsDiablo(),We=E.productIsA2(),Xe=!E.productIsA7SR()&&E.productIsA7Series()||Ke||We?"全速模式":"极速模式",$e=d.useCallback(()=>l.createElement("div",{className:(E.productIsA7Seri
+--- @ 362343
+ent(v.TaskMessageBox,{processNum:ie,processes:le}),l.createElement(y.NetworkMessageBox,{handleSelectIp:e=>{!function(e){Le(w.default(e)),ee(e.adapter_name),oe(e.ip_address),e.connect||ne("")}(e)},ipList:ce,adapterName:$,ssid:te,ip:re})),l.createElement(f.CssKeyTabs,null,l.createElement("div",{className:"touch-pad-icon"},l.createElement(x.ToolTip,{visible:rt,text:""+(Ae?"禁用触摸板":"启用触摸板")}),Ae?l.createElement(m.Icon,{onMouseOver:()=>ot(!0),onMouseOut:()=>ot(!1),onClick:Be,name:"touch-pad"}):l.createElement(m.Icon,{onM
+--- @ 392387
+t("div",{className:"pull-down-area"},c.createElement(l.Icon,{name:"xiala-yuan"})))),c.createElement("li",null,c.createElement("div",{className:"net-title"},"接入点:"),c.createElement("div",null,c.createElement("div",null,e.ssid))),c.createElement("li",null,c.createElement("div",{className:"net-title"},"本地IP:"),c.createElement("div",null,c.createElement("div",null,m&&m.length&&m[o]?m[o].ip_address:null))),c.createElement("li",null,c.createElement("div",{className:"net-title"},"延迟:"),c.createElement("div",{style:{positi
+--- @ 501268
+t50+ps9R8ktigpaqKPVHaxMPdwEnO4PXLYYIV7hs01CzMlgeaAIlzGprrfrGeDYu8DzaMJrPA+H2w96Ew1IsQksr/kPZOHOc7e5+hOJivuijU9DXZOvg+s1mj7tzcR8mzu6TjAoJ2A0DDvjbSoO/itp0kCTUX3Si7TntxXRCZ4gciSCF8m0u49h1YsEXjlDxLifgEJxT0hoGXBBZHfK/ivUaKMnHSSidzB6IdQ4z03UyQ8sc52Ldp8RgHDWAe4KuIAlLigU98ShxZWHw/609FvJO8VY1Jl97yw5y5dzkJB8H9PLlftxPjEhSgw4uDo0qBe0FN+FQ0N2JXmAlXwEFdokfDRBIvqW0W0l1+anYePsPubUuejzg1SDiBsQ2NeSq0UTijvj8KKV3GxflV38JjkpAgZnyQtoYMu8dZZlX0o++0xyCgrFHTm3K8Y6TdNJ5WQ665TdR6jQ11kruU/PlRw627J2tvRibn0qefK55GplkOK+nNuVclNE1vJo1u3KuSd/dJO4l
+
+=== snake_case 字面量 (21) ===
+  3  change_light_bright_event
+  1  close_effect_under_eco
+  2  cpu_temperature_event
+  1  env_light
+  1  get_cfg_macro_button
+  1  get_cfg_main
+  1  get_cfg_script
+  1  highlight_under_turbo
+  1  key_light
+  2  keyboard_colors
+  3  light_atmosphere_status_changed_event
+  2  light_keyboard_status_changed
+  6  macro_button_s
+  1  p_name
+  3  ping_address
+  2  plugin_added
+  9  repair_event
+  1  start_app
+  3  window_close
+  3  window_minify
+  5  window_restore
+
+=== exposeInMainWorld (0) ===

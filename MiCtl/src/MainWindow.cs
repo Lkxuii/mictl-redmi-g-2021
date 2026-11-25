@@ -1,8 +1,16 @@
-// 主窗口 —— 深色无边框现代 UI
-// 功能：档位分段选择 / 温度自动联动 / 温度+风扇转速+网速监控 / GPU 模式 / 快捷控制（触控板、Win 键）/ 开机自启
-// 说明：Fn 锁由 Fn+Esc 硬件切换（仅显示状态）；键盘背光为键盘 Fn 映射控制，不做软件控制
+// 主窗口 —— 无边框深色"仪表"界面
+// 结构：
+//   标题栏
+//   仪表卡片：CPU / GPU / 内存三个环 + CPU、GPU 各一行数据（负载 · 频率 · 功耗 · 风扇）
+//   页签：控制 / 系统 / 网络（窗口高度随页签变化）
+//     控制：性能档位 / 温度自动联动 / 快捷控制 / GPU 模式 / 开机自启 / 状态行
+//     系统：内存与电池概况 / 内存占用前 5 的进程（可结束）/ 打开任务管理器
+//     网络：上下行速率 / 网卡 / 接入点 / 本地 IP / 延迟 / 其它地址
+// 主窗口只读 UiState、只通过 AppController 的公开方法执行动作；AppController 为 null 时是离屏预览模式（见 probe/UiPreview.cs）。
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -10,36 +18,65 @@ namespace MiCtl
 {
     public sealed class MainWindow : Form
     {
+        // ---- 逻辑像素（96 DPI 基准，经 Theme.S() 缩放）----
+        private const int W = 400, M = 20, CW = 360;
+        private const int CardY = 60, CardH = 188;
+        private const int TabY = 266, TabH = 36;
+        private const int PageY = 316;
+        private const int RowH = 38;                       // 控制页列表行高
+        private const int ToggleRight = W - M - 44;
+        private static readonly int[] PageHeights = { 470, 274, 252 };   // 控制 / 系统 / 网络
+
+        private static readonly string[] PageNames = { "控制", "系统", "网络" };
+        private static readonly MifsClient.Profile[] ProfileOrder =
+        {
+            MifsClient.Profile.Quiet, MifsClient.Profile.Balanced, MifsClient.Profile.FullSpeed
+        };
+        private static readonly string[] GpuModeNames = { "混合模式", "独显直连" };
+        private const int ProcRows = 5;
+        private const int ProcRowH = 30;
+        private const int ProcRow0 = 102;
+
         private readonly AppController _app;
+        private UiState _state = new UiState();
+        private bool _suppress;
+        private int? _gpuModeDetected;
+        private int _gpuChoice = -1;
 
-        // 温度区
-        private Label _lblCpuTemp, _lblGpuTemp, _lblGpuDetail, _lblNetFan;
-        private StatusDot _dotCpu, _dotGpu;
+        // 仪表
+        private GaugeRing _gaugeCpu, _gaugeGpu, _gaugeMem;
+        private Label _lblCpuLoad, _lblCpuClock, _lblCpuPwr, _lblCpuFan;
+        private Label _lblGpuLoad, _lblGpuClock, _lblGpuPwr, _lblGpuFan;
 
-        // 档位与联动
-        private SegmentedProfiles _segProfiles;
-        private ToggleSwitch _tglAuto;
-        private NumericUpDown _numLow, _numHigh;
+        // 页签与页面
+        private TabStrip _tabs;
+        private Panel _pageControl, _pageSystem, _pageNetwork;
 
-        // GPU 模式
-        private ComboBox _cboGpuMode;
-        private Button _btnGpuApply;
+        // 控制页
+        private Segmented _segProfiles, _segGpu;
+        private ToggleSwitch _tglAuto, _tglTouchpad, _tglWinKey, _tglStartup;
+        private Stepper _stpLow, _stpHigh;
+        private StatusPill _pillTouchpadEc, _pillFnLock;
+        private AccentButton _btnGpuApply;
+        private Label _lblFnNote, _lblGpuModeNote, _lblStatus;
 
-        // 快捷控制
-        private Label _lblFnLockState;
-        private ToggleSwitch _tglTouchpad, _tglWinKey;
+        // 系统页
+        private Label _lblMemDetail, _lblBattDetail, _lblProcCount, _lblProcEmpty;
+        private TextButton _btnTaskMgr;
+        private readonly Label[] _procName = new Label[ProcRows];
+        private readonly Label[] _procMem = new Label[ProcRows];
+        private readonly GhostButton[] _procKill = new GhostButton[ProcRows];
+        private readonly Label[] _procLine = new Label[ProcRows];
 
-        // 其它
-        private ToggleSwitch _tglStartup;
-        private Label _lblStatus;
-        private bool _suppressEvents;
+        // 网络页
+        private Label _lblDownNum, _lblDownUnit, _lblUpNum, _lblUpUnit, _lblSession;
+        private Label _lblNetNic, _lblNetWifi, _lblNetIp, _lblNetPing, _lblNetOthers;
+        private Panel _rowNetWifi, _rowNetOthers;
+        private Panel _rowTmp;
+        private TextButton _btnPing;
 
-        [DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
-
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
-
+        [DllImport("user32.dll")] private static extern bool ReleaseCapture();
+        [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HTCAPTION = 0x2;
 
@@ -50,22 +87,30 @@ namespace MiCtl
             Text = "MiCtl";
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(400, 668);
             BackColor = Theme.Bg;
-            Font = new Font("Microsoft YaHei UI", 9f);
             DoubleBuffered = true;
             KeyPreview = true;
+            Font = Theme.F(Theme.Cn, 13);
 
             BuildUi();
-            LoadState();
 
-            _app.SensorsUpdated += OnSensorsUpdatedThread;
-            _app.ProfileChanged += OnProfileChangedThread;
+            _gpuModeDetected = DetectGpuMode();
+            _gpuChoice = _gpuModeDetected.HasValue ? _gpuModeDetected.Value : -1;
+
+            if (_app != null)
+            {
+                _app.SensorsUpdated += OnAppUpdated;
+                _app.ProfileChanged += OnAppUpdated;
+            }
             FormClosed += delegate
             {
-                _app.SensorsUpdated -= OnSensorsUpdatedThread;
-                _app.ProfileChanged -= OnProfileChangedThread;
+                if (_app == null) return;
+                _app.SensorsUpdated -= OnAppUpdated;
+                _app.ProfileChanged -= OnAppUpdated;
             };
+
+            SetPage(0);
+            ApplyState(_app != null ? UiState.Capture(_app) : UiState.Empty());
         }
 
         // ---- 无边框拖动 ----
@@ -78,552 +123,686 @@ namespace MiCtl
             }
         }
 
+        // ---------------- 小工具 ----------------
+        private static Label Lbl(string text, string family, float px, Color color, int x, int y)
+        {
+            Label l = new Label();
+            l.Text = text;
+            l.Font = Theme.F(family, px);
+            l.ForeColor = color;
+            l.AutoSize = true;
+            l.BackColor = Color.Transparent;
+            l.UseMnemonic = false;
+            l.Location = Theme.P(x, y);
+            return l;
+        }
+
+        /// <summary>定宽、超长显示省略号的标签</summary>
+        private static Label LblEllipsis(string text, float px, Color color, int x, int y, int w)
+        {
+            Label l = Lbl(text, Theme.Cn, px, color, x, y);
+            l.AutoSize = false;
+            l.AutoEllipsis = true;
+            l.Size = Theme.Sz(w, 18);
+            return l;
+        }
+
+        private static void PlaceRight(Control c, int rightX, int y)
+        {
+            c.Left = Theme.S(rightX) - c.Width;
+            c.Top = Theme.S(y);
+        }
+
+        private static void AddDivider(Control parent, int x, int y, int w)
+        {
+            Label line = new Label();
+            line.AutoSize = false;
+            line.Size = new Size(Theme.S(w), 1);          // 分隔线固定 1 物理像素
+            line.Location = new Point(Theme.S(x), Theme.S(y));
+            line.BackColor = Theme.CardBorder;
+            parent.Controls.Add(line);
+        }
+
+        /// <summary>详情行：一个行容器（可整行隐藏）+ 标题 + 定宽值</summary>
+        private static void MakeRow(Control parent, string title, int y, int valueX, int valueW,
+            out Panel row, out Label value)
+        {
+            row = new Panel();
+            row.Bounds = Theme.R(0, y, W, ProcRowH);
+            row.BackColor = Theme.Bg;
+            parent.Controls.Add(row);
+            row.Controls.Add(Lbl(title, Theme.Cn, 11, Theme.TextDim, M, 8));
+            value = LblEllipsis("", 11.5f, Theme.TextMain, valueX, 7, valueW);
+            row.Controls.Add(value);
+        }
+
         // ---------------- UI 构建 ----------------
         private void BuildUi()
         {
             // ===== 标题栏 =====
-            Panel titleBar = new Panel();
-            titleBar.Size = new Size(400, 46);
-            titleBar.Location = new Point(0, 0);
-            titleBar.BackColor = Theme.Bg;
-            titleBar.MouseClick += delegate (object s, MouseEventArgs e) { DragWindow(e); };
-            titleBar.MouseMove += delegate (object s, MouseEventArgs e)
-            {
-                if (e.Button == MouseButtons.Left) DragWindow(e);
-            };
+            Panel bar = new Panel();
+            bar.Bounds = Theme.R(0, 0, W, 48);
+            bar.BackColor = Theme.Bg;
+            bar.MouseDown += delegate (object s, MouseEventArgs e) { DragWindow(e); };
+            bar.MouseMove += delegate (object s, MouseEventArgs e) { if (e.Button == MouseButtons.Left) DragWindow(e); };
+            Controls.Add(bar);
+            bar.Controls.Add(Lbl("MiCtl", Theme.UiSemibold, 15, Theme.TextMain, 20, 14));
+            bar.Controls.Add(Lbl("Redmi G 2021", Theme.Ui, 12, Theme.TextDim, 66, 17));
 
-            Label title = new Label();
-            title.Text = "MiCtl";
-            title.Font = new Font("Segoe UI Semibold", 11f);
-            title.ForeColor = Theme.TextMain;
-            title.Location = new Point(18, 11);
-            title.AutoSize = true;
-            title.BackColor = Color.Transparent;
-            titleBar.Controls.Add(title);
+            IconButton btnMin = new IconButton("\uE921");   // ChromeMinimize
+            btnMin.Bounds = Theme.R(W - 88, 8, 36, 32);
+            btnMin.Click += delegate { WindowState = FormWindowState.Minimized; };
+            IconButton btnClose = new IconButton("\uE8BB");  // ChromeClose
+            btnClose.Bounds = Theme.R(W - 48, 8, 36, 32);
+            btnClose.Click += delegate { Hide(); };
+            bar.Controls.Add(btnMin);
+            bar.Controls.Add(btnClose);
 
-            Label subtitle = new Label();
-            subtitle.Text = "Redmi G 2021";
-            subtitle.Font = new Font("Segoe UI", 8f);
-            subtitle.ForeColor = Theme.TextDim;
-            subtitle.Location = new Point(74, 15);
-            subtitle.AutoSize = true;
-            subtitle.BackColor = Color.Transparent;
-            titleBar.Controls.Add(subtitle);
+            BuildDashboard();
+            BuildTabs();
+            BuildControlPage();
+            BuildSystemPage();
+            BuildNetworkPage();
+        }
 
-            Label btnMin = MakeTitleButton("─", 400 - 76);
-            Label btnClose = MakeTitleButton("✕", 400 - 40);
-            titleBar.Controls.Add(btnMin);
-            titleBar.Controls.Add(btnClose);
-            Controls.Add(titleBar);
+        // ===== 仪表卡片：三个环 + CPU / GPU 各一行数据 =====
+        private void BuildDashboard()
+        {
+            RoundedCard card = new RoundedCard();
+            card.Bounds = Theme.R(M, CardY, CW, CardH);
+            Controls.Add(card);
 
-            // ===== 温度卡片（含网速与风扇转速）=====
-            RoundedCard cardTemp = new RoundedCard();
-            cardTemp.Size = new Size(364, 150);
-            cardTemp.Location = new Point(18, 54);
-            Controls.Add(cardTemp);
+            _gaugeCpu = new GaugeRing("CPU");
+            _gaugeCpu.Bounds = Theme.R(16, 8, 100, 114);
+            card.Controls.Add(_gaugeCpu);
+            _gaugeGpu = new GaugeRing("GPU");
+            _gaugeGpu.Bounds = Theme.R(129, 8, 100, 114);
+            card.Controls.Add(_gaugeGpu);
+            _gaugeMem = new GaugeRing("内存");
+            _gaugeMem.SetMode("%", false, Theme.Blue);
+            _gaugeMem.Bounds = Theme.R(242, 8, 100, 114);
+            card.Controls.Add(_gaugeMem);
 
-            Label lblCpuTitle = new Label();
-            lblCpuTitle.Text = "CPU";
-            lblCpuTitle.Font = new Font("Segoe UI", 8.5f);
-            lblCpuTitle.ForeColor = Theme.TextSub;
-            lblCpuTitle.Location = new Point(30, 14);
-            lblCpuTitle.AutoSize = true;
-            lblCpuTitle.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(lblCpuTitle);
+            AddDivider(card, 20, 128, CW - 40);
 
-            _dotCpu = new StatusDot();
-            _dotCpu.Location = new Point(60, 18);
-            cardTemp.Controls.Add(_dotCpu);
+            // 列：标签 20 | 负载 56 | 频率 100 | 功耗 184 | 风扇 232（等宽数字，列自然对齐）
+            card.Controls.Add(Lbl("CPU", Theme.Cn, 11, Theme.TextDim, 20, 138));
+            _lblCpuLoad = Lbl("--", Theme.Mono, 12, Theme.TextMain, 56, 137);
+            _lblCpuClock = Lbl("--", Theme.Mono, 12, Theme.TextMain, 100, 137);
+            _lblCpuPwr = Lbl("--", Theme.Mono, 12, Theme.TextMain, 184, 137);
+            _lblCpuFan = Lbl("--", Theme.Mono, 12, Theme.TextMain, 232, 137);
+            card.Controls.Add(_lblCpuLoad);
+            card.Controls.Add(_lblCpuClock);
+            card.Controls.Add(_lblCpuPwr);
+            card.Controls.Add(_lblCpuFan);
 
-            _lblCpuTemp = new Label();
-            _lblCpuTemp.Text = "--";
-            _lblCpuTemp.Font = new Font("Segoe UI Semibold", 26f);
-            _lblCpuTemp.ForeColor = Theme.TextMain;
-            _lblCpuTemp.Location = new Point(28, 30);
-            _lblCpuTemp.AutoSize = true;
-            _lblCpuTemp.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(_lblCpuTemp);
+            card.Controls.Add(Lbl("GPU", Theme.Cn, 11, Theme.TextDim, 20, 158));
+            _lblGpuLoad = Lbl("--", Theme.Mono, 12, Theme.TextMain, 56, 157);
+            _lblGpuClock = Lbl("--", Theme.Mono, 12, Theme.TextMain, 100, 157);
+            _lblGpuPwr = Lbl("--", Theme.Mono, 12, Theme.TextMain, 184, 157);
+            _lblGpuFan = Lbl("--", Theme.Mono, 12, Theme.TextMain, 232, 157);
+            card.Controls.Add(_lblGpuLoad);
+            card.Controls.Add(_lblGpuClock);
+            card.Controls.Add(_lblGpuPwr);
+            card.Controls.Add(_lblGpuFan);
+        }
 
-            Label lblGpuTitle = new Label();
-            lblGpuTitle.Text = "GPU";
-            lblGpuTitle.Font = new Font("Segoe UI", 8.5f);
-            lblGpuTitle.ForeColor = Theme.TextSub;
-            lblGpuTitle.Location = new Point(210, 14);
-            lblGpuTitle.AutoSize = true;
-            lblGpuTitle.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(lblGpuTitle);
+        // ===== 页签 =====
+        private void BuildTabs()
+        {
+            _tabs = new TabStrip(PageNames);
+            _tabs.Bounds = Theme.R(M, TabY, CW, TabH);
+            _tabs.SelectedChanged += delegate { SetPage(_tabs.SelectedIndex); };
+            Controls.Add(_tabs);
 
-            _dotGpu = new StatusDot();
-            _dotGpu.Location = new Point(240, 18);
-            cardTemp.Controls.Add(_dotGpu);
+            int maxH = 0;
+            foreach (int h in PageHeights) if (h > maxH) maxH = h;
+            _pageControl = NewPage(maxH);
+            _pageSystem = NewPage(maxH);
+            _pageNetwork = NewPage(maxH);
+        }
 
-            _lblGpuTemp = new Label();
-            _lblGpuTemp.Text = "--";
-            _lblGpuTemp.Font = new Font("Segoe UI Semibold", 26f);
-            _lblGpuTemp.ForeColor = Theme.TextMain;
-            _lblGpuTemp.Location = new Point(208, 30);
-            _lblGpuTemp.AutoSize = true;
-            _lblGpuTemp.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(_lblGpuTemp);
+        private Panel NewPage(int h)
+        {
+            Panel p = new Panel();
+            p.Bounds = Theme.R(0, PageY, W, h);
+            p.BackColor = Theme.Bg;
+            Controls.Add(p);
+            return p;
+        }
 
-            _lblGpuDetail = new Label();
-            _lblGpuDetail.Text = "GPU 负载 --%  ·  功耗 --W  ·  CPU --W";
-            _lblGpuDetail.Font = new Font("Segoe UI", 8.5f);
-            _lblGpuDetail.ForeColor = Theme.TextSub;
-            _lblGpuDetail.Location = new Point(30, 84);
-            _lblGpuDetail.AutoSize = true;
-            _lblGpuDetail.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(_lblGpuDetail);
+        private void SetPage(int i)
+        {
+            if (_tabs == null) return;
+            if (i < 0 || i >= PageHeights.Length) i = 0;
+            _pageControl.Visible = i == 0;
+            _pageSystem.Visible = i == 1;
+            _pageNetwork.Visible = i == 2;
+            ClientSize = Theme.Sz(W, PageY + PageHeights[i]);
+        }
 
-            _lblNetFan = new Label();
-            _lblNetFan.Text = "↓ --  ↑ --" + (HasFanData() ? "  ·  风扇 -- RPM" : "");
-            _lblNetFan.Font = new Font("Segoe UI", 8.5f);
-            _lblNetFan.ForeColor = Theme.TextSub;
-            _lblNetFan.Location = new Point(30, 112);
-            _lblNetFan.AutoSize = true;
-            _lblNetFan.BackColor = Color.Transparent;
-            cardTemp.Controls.Add(_lblNetFan);
+        /// <summary>切到某一页（预览工具用）</summary>
+        public void SelectPage(int i)
+        {
+            _tabs.SelectedIndex = i;
+        }
 
-            // ===== 档位 =====
-            Label lblProfile = new Label();
-            lblProfile.Text = "性能档位";
-            lblProfile.Font = new Font("Segoe UI", 8.5f);
-            lblProfile.ForeColor = Theme.TextSub;
-            lblProfile.Location = new Point(22, 218);
-            lblProfile.AutoSize = true;
-            lblProfile.BackColor = Color.Transparent;
-            Controls.Add(lblProfile);
+        // ===== 控制页 =====
+        private void BuildControlPage()
+        {
+            Panel p = _pageControl;
+            int y;
 
-            Label lblProfileNote = new Label();
-            lblProfileNote.Text = "联动风扇曲线与功耗墙";
-            lblProfileNote.Font = new Font("Segoe UI", 8f);
-            lblProfileNote.ForeColor = Theme.TextDim;
-            lblProfileNote.Location = new Point(90, 219);
-            lblProfileNote.AutoSize = true;
-            lblProfileNote.BackColor = Color.Transparent;
-            Controls.Add(lblProfileNote);
+            // 性能档位
+            p.Controls.Add(Lbl("性能档位", Theme.Cn, 11, Theme.TextSub, 22, 0));
+            _segProfiles = new Segmented(new[] { "静谧", "均衡", "极速" },
+                new[] { Theme.Green, Theme.Blue, Theme.Red }, false);
+            _segProfiles.Bounds = Theme.R(M, 20, CW, 44);
+            _segProfiles.SelectedChanged += OnProfileSegmentChanged;
+            p.Controls.Add(_segProfiles);
 
-            _segProfiles = new SegmentedProfiles();
-            _segProfiles.Size = new Size(364, 46);
-            _segProfiles.Location = new Point(18, 238);
-            _segProfiles.Font = new Font("Microsoft YaHei UI", 10.5f);
-            _segProfiles.SegmentClicked += delegate (MifsClient.Profile p)
-            {
-                bool ok = _app.SwitchProfile(p);
-                if (!ok)
-                {
-                    MessageBox.Show("档位切换失败（MIFS 不可用）", "MiCtl",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-                HighlightProfile();
-            };
-            Controls.Add(_segProfiles);
-
-            // ===== 自动联动卡片 =====
-            RoundedCard cardAuto = new RoundedCard();
-            cardAuto.Size = new Size(364, 96);
-            cardAuto.Location = new Point(18, 298);
-            Controls.Add(cardAuto);
-
-            Label lblAuto = new Label();
-            lblAuto.Text = "温度自动联动";
-            lblAuto.Font = new Font("Microsoft YaHei UI", 9.5f);
-            lblAuto.ForeColor = Theme.TextMain;
-            lblAuto.Location = new Point(20, 14);
-            lblAuto.AutoSize = true;
-            lblAuto.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblAuto);
-
-            Label lblAutoNote = new Label();
-            lblAutoNote.Text = "按温度在档位间自动切换";
-            lblAutoNote.Font = new Font("Segoe UI", 8f);
-            lblAutoNote.ForeColor = Theme.TextDim;
-            lblAutoNote.Location = new Point(120, 17);
-            lblAutoNote.AutoSize = true;
-            lblAutoNote.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblAutoNote);
-
+            // 温度自动联动
+            p.Controls.Add(Lbl("温度自动联动", Theme.Cn, 13, Theme.TextMain, M, 80));
+            p.Controls.Add(Lbl("按温度在三档之间切换", Theme.Cn, 11, Theme.TextDim, 124, 83));
             _tglAuto = new ToggleSwitch();
-            _tglAuto.Location = new Point(320, 12);
+            _tglAuto.Bounds = Theme.R(ToggleRight, 78, 44, 24);
             _tglAuto.CheckedChanged += delegate
             {
-                if (_suppressEvents) return;
+                if (_suppress || _app == null) return;
                 _app.SetAutoEnabled(_tglAuto.Checked);
-                bool on = _tglAuto.Checked;
-                _numLow.Enabled = on;
-                _numHigh.Enabled = on;
+                ApplyLive();
             };
-            cardAuto.Controls.Add(_tglAuto);
+            p.Controls.Add(_tglAuto);
 
-            Label lblLow = new Label();
-            lblLow.Text = "静谧阈值";
-            lblLow.Font = new Font("Segoe UI", 8.5f);
-            lblLow.ForeColor = Theme.TextSub;
-            lblLow.Location = new Point(20, 58);
-            lblLow.AutoSize = true;
-            lblLow.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblLow);
+            p.Controls.Add(Lbl("静谧阈值", Theme.Cn, 11, Theme.TextSub, M, 122));
+            _stpLow = new Stepper(50, 95, 65);
+            _stpLow.Bounds = Theme.R(78, 115, 88, 30);
+            _stpLow.ValueChanged += delegate { ThresholdChanged(); };
+            p.Controls.Add(_stpLow);
+            p.Controls.Add(Lbl("°C", Theme.Ui, 11.5f, Theme.TextSub, 172, 122));
 
-            _numLow = DarkNumeric(88, 55);
-            cardAuto.Controls.Add(_numLow);
-            Label lblLowUnit = new Label();
-            lblLowUnit.Text = "°C";
-            lblLowUnit.Font = new Font("Segoe UI", 8.5f);
-            lblLowUnit.ForeColor = Theme.TextSub;
-            lblLowUnit.Location = new Point(150, 58);
-            lblLowUnit.AutoSize = true;
-            lblLowUnit.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblLowUnit);
+            p.Controls.Add(Lbl("极速阈值", Theme.Cn, 11, Theme.TextSub, 206, 122));
+            _stpHigh = new Stepper(50, 95, 78);
+            _stpHigh.Bounds = Theme.R(268, 115, 88, 30);
+            _stpHigh.ValueChanged += delegate { ThresholdChanged(); };
+            p.Controls.Add(_stpHigh);
+            p.Controls.Add(Lbl("°C", Theme.Ui, 11.5f, Theme.TextSub, 362, 122));
 
-            Label lblHigh = new Label();
-            lblHigh.Text = "极速阈值";
-            lblHigh.Font = new Font("Segoe UI", 8.5f);
-            lblHigh.ForeColor = Theme.TextSub;
-            lblHigh.Location = new Point(196, 58);
-            lblHigh.AutoSize = true;
-            lblHigh.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblHigh);
+            // 快捷控制
+            p.Controls.Add(Lbl("快捷控制", Theme.Cn, 11, Theme.TextSub, 22, 166));
 
-            _numHigh = DarkNumeric(266, 60);
-            cardAuto.Controls.Add(_numHigh);
-            Label lblHighUnit = new Label();
-            lblHighUnit.Text = "°C";
-            lblHighUnit.Font = new Font("Segoe UI", 8.5f);
-            lblHighUnit.ForeColor = Theme.TextSub;
-            lblHighUnit.Location = new Point(328, 58);
-            lblHighUnit.AutoSize = true;
-            lblHighUnit.BackColor = Color.Transparent;
-            cardAuto.Controls.Add(lblHighUnit);
-
-            _numLow.ValueChanged += delegate
-            {
-                if (!_suppressEvents)
-                {
-                    _app.Settings.LowThreshold = (double)_numLow.Value;
-                    _app.SaveSettings();
-                }
-            };
-            _numHigh.ValueChanged += delegate
-            {
-                if (!_suppressEvents)
-                {
-                    _app.Settings.HighThreshold = (double)_numHigh.Value;
-                    _app.SaveSettings();
-                }
-            };
-
-            // ===== 快捷控制卡片 =====
-            RoundedCard cardCtl = new RoundedCard();
-            cardCtl.Size = new Size(364, 110);
-            cardCtl.Location = new Point(18, 406);
-            Controls.Add(cardCtl);
-
-            Label lblCtlTitle = new Label();
-            lblCtlTitle.Text = "快捷控制";
-            lblCtlTitle.Font = new Font("Segoe UI", 8.5f);
-            lblCtlTitle.ForeColor = Theme.TextSub;
-            lblCtlTitle.Location = new Point(20, 10);
-            lblCtlTitle.AutoSize = true;
-            lblCtlTitle.BackColor = Color.Transparent;
-            cardCtl.Controls.Add(lblCtlTitle);
-
-            // Fn 锁状态（只读，Fn+Esc 硬件切换）
-            Label lblFn = new Label();
-            lblFn.Text = "Fn 锁";
-            lblFn.Font = new Font("Microsoft YaHei UI", 9f);
-            lblFn.ForeColor = Theme.TextMain;
-            lblFn.Location = new Point(20, 36);
-            lblFn.AutoSize = true;
-            lblFn.BackColor = Color.Transparent;
-            cardCtl.Controls.Add(lblFn);
-
-            _lblFnLockState = new Label();
-            _lblFnLockState.Text = "--（Fn+Esc 切换）";
-            _lblFnLockState.Font = new Font("Segoe UI", 8.5f);
-            _lblFnLockState.ForeColor = Theme.TextDim;
-            _lblFnLockState.Location = new Point(90, 38);
-            _lblFnLockState.AutoSize = true;
-            _lblFnLockState.BackColor = Color.Transparent;
-            cardCtl.Controls.Add(_lblFnLockState);
-
-            // 触控板
-            Label lblTp = new Label();
-            lblTp.Text = "禁用触控板";
-            lblTp.Font = new Font("Microsoft YaHei UI", 9f);
-            lblTp.ForeColor = Theme.TextMain;
-            lblTp.Location = new Point(20, 62);
-            lblTp.AutoSize = true;
-            lblTp.BackColor = Color.Transparent;
-            cardCtl.Controls.Add(lblTp);
-
+            y = 188;
+            p.Controls.Add(Lbl("禁用触控板", Theme.Cn, 13, Theme.TextMain, M, y + 11));
+            _pillTouchpadEc = new StatusPill();
+            _pillTouchpadEc.Location = Theme.P(M + 92, y + 8);
+            p.Controls.Add(_pillTouchpadEc);
             _tglTouchpad = new ToggleSwitch();
-            _tglTouchpad.Location = new Point(320, 60);
+            _tglTouchpad.Bounds = Theme.R(ToggleRight, y + 7, 44, 24);
             _tglTouchpad.CheckedChanged += delegate
             {
-                if (_suppressEvents) return;
+                if (_suppress || _app == null) return;
                 if (!TouchpadControl.SetDisabled(_tglTouchpad.Checked))
-                {
-                    _suppressEvents = true;
-                    _tglTouchpad.Checked = !_tglTouchpad.Checked;
-                    _suppressEvents = false;
-                    MessageBox.Show("触控板控制失败（未找到设备或权限不足）", "MiCtl");
-                }
+                    MessageBox.Show("触控板控制失败：没有找到触控板设备，或权限不足。", "MiCtl",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _app.RefreshDeviceStates();
+                ApplyLive();
             };
-            cardCtl.Controls.Add(_tglTouchpad);
+            p.Controls.Add(_tglTouchpad);
+            AddDivider(p, M, y + RowH, CW);
 
-            // Win 键
-            Label lblWin = new Label();
-            lblWin.Text = "禁用 Win 键（游戏防误触）";
-            lblWin.Font = new Font("Microsoft YaHei UI", 9f);
-            lblWin.ForeColor = Theme.TextMain;
-            lblWin.Location = new Point(20, 88);
-            lblWin.AutoSize = true;
-            lblWin.BackColor = Color.Transparent;
-            cardCtl.Controls.Add(lblWin);
-
+            y += RowH;
+            p.Controls.Add(Lbl("禁用 Win 键", Theme.Cn, 13, Theme.TextMain, M, y + 11));
+            p.Controls.Add(Lbl("游戏时防误触", Theme.Cn, 11, Theme.TextDim, M + 92, y + 12));
             _tglWinKey = new ToggleSwitch();
-            _tglWinKey.Location = new Point(320, 86);
+            _tglWinKey.Bounds = Theme.R(ToggleRight, y + 7, 44, 24);
             _tglWinKey.CheckedChanged += delegate
             {
-                if (_suppressEvents) return;
+                if (_suppress || _app == null) return;
                 if (!_app.SetWinKeyLock(_tglWinKey.Checked))
-                {
-                    _suppressEvents = true;
-                    _tglWinKey.Checked = !_tglWinKey.Checked;
-                    _suppressEvents = false;
-                    MessageBox.Show("Win 键钩子安装失败", "MiCtl");
-                }
+                    MessageBox.Show("Win 键钩子安装失败。", "MiCtl",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ApplyLive();
             };
-            cardCtl.Controls.Add(_tglWinKey);
+            p.Controls.Add(_tglWinKey);
+            AddDivider(p, M, y + RowH, CW);
 
-            // ===== GPU 模式卡片 =====
-            RoundedCard cardGpu = new RoundedCard();
-            cardGpu.Size = new Size(364, 76);
-            cardGpu.Location = new Point(18, 528);
-            Controls.Add(cardGpu);
+            y += RowH;
+            p.Controls.Add(Lbl("Fn 锁", Theme.Cn, 13, Theme.TextMain, M, y + 11));
+            _pillFnLock = new StatusPill();
+            _pillFnLock.Location = Theme.P(M + 92, y + 8);
+            p.Controls.Add(_pillFnLock);
+            _lblFnNote = Lbl("由 Fn+Esc 切换，只影响自带键盘", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
+            p.Controls.Add(_lblFnNote);
 
-            Label lblGpuMode = new Label();
-            lblGpuMode.Text = "GPU 模式";
-            lblGpuMode.Font = new Font("Microsoft YaHei UI", 9.5f);
-            lblGpuMode.ForeColor = Theme.TextMain;
-            lblGpuMode.Location = new Point(20, 12);
-            lblGpuMode.AutoSize = true;
-            lblGpuMode.BackColor = Color.Transparent;
-            cardGpu.Controls.Add(lblGpuMode);
-
-            Label lblGpuModeNote = new Label();
-            lblGpuModeNote.Text = "切换后需重启生效";
-            lblGpuModeNote.Font = new Font("Segoe UI", 8f);
-            lblGpuModeNote.ForeColor = Theme.TextDim;
-            lblGpuModeNote.Location = new Point(96, 15);
-            lblGpuModeNote.AutoSize = true;
-            lblGpuModeNote.BackColor = Color.Transparent;
-            cardGpu.Controls.Add(lblGpuModeNote);
-
-            _cboGpuMode = DarkCombo(20, 40);
-            cardGpu.Controls.Add(_cboGpuMode);
-
-            _btnGpuApply = new Button();
-            _btnGpuApply.Text = "应用";
-            _btnGpuApply.Font = new Font("Microsoft YaHei UI", 9f);
-            _btnGpuApply.FlatStyle = FlatStyle.Flat;
-            _btnGpuApply.FlatAppearance.BorderSize = 0;
-            _btnGpuApply.BackColor = Theme.Accent;
-            _btnGpuApply.ForeColor = Color.White;
-            _btnGpuApply.Location = new Point(280, 39);
-            _btnGpuApply.Size = new Size(64, 28);
-            _btnGpuApply.Cursor = Cursors.Hand;
+            // GPU 模式
+            p.Controls.Add(Lbl("GPU 模式", Theme.Cn, 11, Theme.TextSub, 22, 320));
+            _lblGpuModeNote = Lbl("", Theme.Cn, 11, Theme.TextDim, 92, 322);
+            p.Controls.Add(_lblGpuModeNote);
+            _segGpu = new Segmented(GpuModeNames, new[] { Theme.Accent, Theme.Accent }, true);
+            _segGpu.Bounds = Theme.R(M, 342, 244, 36);
+            _segGpu.SelectedChanged += delegate
+            {
+                if (_suppress) return;
+                _gpuChoice = _segGpu.SelectedIndex;
+                UpdateGpuUi();
+            };
+            p.Controls.Add(_segGpu);
+            _btnGpuApply = new AccentButton("应用");
+            _btnGpuApply.Bounds = Theme.R(276, 342, 104, 36);
             _btnGpuApply.Click += delegate { ApplyGpuMode(); };
-            cardGpu.Controls.Add(_btnGpuApply);
+            p.Controls.Add(_btnGpuApply);
 
-            // ===== 自启 + 状态 =====
-            Label lblStartup = new Label();
-            lblStartup.Text = "开机自启（计划任务，免 UAC）";
-            lblStartup.Font = new Font("Segoe UI", 8.5f);
-            lblStartup.ForeColor = Theme.TextSub;
-            lblStartup.Location = new Point(22, 614);
-            lblStartup.AutoSize = true;
-            lblStartup.BackColor = Color.Transparent;
-            Controls.Add(lblStartup);
-
+            // 开机自启 + 状态行
+            p.Controls.Add(Lbl("开机自启", Theme.Cn, 13, Theme.TextMain, M, 400));
+            p.Controls.Add(Lbl("登录时以管理员身份启动", Theme.Cn, 11, Theme.TextDim, 92, 403));
             _tglStartup = new ToggleSwitch();
-            _tglStartup.Location = new Point(366 - 46, 610);
+            _tglStartup.Bounds = Theme.R(ToggleRight, 397, 44, 24);
             _tglStartup.CheckedChanged += delegate
             {
-                if (_suppressEvents) return;
+                if (_suppress || _app == null) return;
                 StartupManager.Toggle();
-                _suppressEvents = true;
-                _tglStartup.Checked = StartupManager.IsEnabled();
-                _suppressEvents = false;
+                _app.RefreshDeviceStates();
+                ApplyLive();
             };
-            Controls.Add(_tglStartup);
+            p.Controls.Add(_tglStartup);
 
-            _lblStatus = new Label();
-            _lblStatus.Font = new Font("Segoe UI", 8f);
-            _lblStatus.ForeColor = Theme.TextDim;
-            _lblStatus.Location = new Point(22, 644);
-            _lblStatus.AutoSize = true;
-            _lblStatus.BackColor = Color.Transparent;
-            Controls.Add(_lblStatus);
+            _lblStatus = Lbl("", Theme.Cn, 10.5f, Theme.TextDim, M, 438);
+            p.Controls.Add(_lblStatus);
         }
 
-        private Label MakeTitleButton(string glyph, int x)
+        // ===== 系统页：内存 / 电池 / 进程 =====
+        private void BuildSystemPage()
         {
-            Label l = new Label();
-            l.Text = glyph;
-            l.Font = new Font("Segoe UI", 10f);
-            l.ForeColor = Theme.TextSub;
-            l.Size = new Size(38, 46);
-            l.Location = new Point(x, 0);
-            l.TextAlign = ContentAlignment.MiddleCenter;
-            l.BackColor = Color.Transparent;
-            l.Cursor = Cursors.Hand;
-            l.MouseEnter += delegate { l.ForeColor = Theme.TextMain; };
-            l.MouseLeave += delegate { l.ForeColor = Theme.TextSub; };
-            l.Click += delegate
+            Panel p = _pageSystem;
+            p.Controls.Add(Lbl("内存", Theme.Cn, 13, Theme.TextMain, M, 6));
+            _lblMemDetail = LblEllipsis("", 11, Theme.TextDim, 64, 9, 316);
+            p.Controls.Add(_lblMemDetail);
+
+            p.Controls.Add(Lbl("电池", Theme.Cn, 13, Theme.TextMain, M, 34));
+            _lblBattDetail = LblEllipsis("", 11, Theme.TextDim, 64, 37, 316);
+            p.Controls.Add(_lblBattDetail);
+
+            AddDivider(p, M, 62, CW);
+
+            p.Controls.Add(Lbl("进程", Theme.Cn, 11, Theme.TextSub, 22, 76));
+            _lblProcCount = Lbl("", Theme.Cn, 11, Theme.TextDim, 58, 76);
+            p.Controls.Add(_lblProcCount);
+            _btnTaskMgr = new TextButton("打开任务管理器");
+            _btnTaskMgr.Size = Theme.Sz(_btnTaskMgr.PreferredWidth(), 26);
+            PlaceRight(_btnTaskMgr, W - M, 70);
+            _btnTaskMgr.Click += delegate
             {
-                if (glyph == "✕")
-                {
-                    Hide(); // 隐藏到托盘
-                }
-                else
-                {
-                    WindowState = FormWindowState.Minimized;
-                }
+                SystemInfo.OpenTaskManager();
             };
-            return l;
-        }
+            p.Controls.Add(_btnTaskMgr);
 
-        private static NumericUpDown DarkNumeric(int x, decimal val)
-        {
-            NumericUpDown n = new NumericUpDown();
-            n.Minimum = 50; n.Maximum = 95;
-            n.Location = new Point(x, 54);
-            n.Width = 52;
-            n.Font = new Font("Segoe UI", 9f);
-            n.BorderStyle = BorderStyle.FixedSingle;
-            n.BackColor = Theme.CardHover;
-            n.ForeColor = Theme.TextMain;
-            n.Value = val;
-            return n;
-        }
+            _lblProcEmpty = Lbl("读不到进程列表", Theme.Cn, 11.5f, Theme.TextDim, M, ProcRow0 + 8);
+            _lblProcEmpty.Visible = false;
+            p.Controls.Add(_lblProcEmpty);
 
-        private static ComboBox DarkCombo(int x, int y)
-        {
-            ComboBox c = new ComboBox();
-            c.DropDownStyle = ComboBoxStyle.DropDownList;
-            c.FlatStyle = FlatStyle.Flat;
-            c.Location = new Point(x, y);
-            c.Width = 240;
-            c.Font = new Font("Microsoft YaHei UI", 9f);
-            c.BackColor = Theme.CardHover;
-            c.ForeColor = Theme.TextMain;
-            c.DrawMode = DrawMode.OwnerDrawFixed;
-            c.DrawItem += delegate (object s, DrawItemEventArgs e)
+            for (int i = 0; i < ProcRows; i++)
             {
-                ComboBox cb = (ComboBox)s;
-                e.DrawBackground();
-                if (e.Index >= 0)
+                int y = ProcRow0 + i * ProcRowH;
+                int idx = i;
+                _procName[i] = LblEllipsis("", 13, Theme.TextMain, M, y + 7, 168);
+                p.Controls.Add(_procName[i]);
+                _procMem[i] = Lbl("--", Theme.Mono, 12, Theme.TextSub, 0, y + 8);
+                p.Controls.Add(_procMem[i]);
+                _procKill[i] = new GhostButton("结束");
+                _procKill[i].Danger = true;
+                _procKill[i].Bounds = Theme.R(312, y + 3, 68, 24);
+                _procKill[i].Click += delegate { KillAt(idx); };
+                p.Controls.Add(_procKill[i]);
+                if (i < ProcRows - 1)
                 {
-                    Color tc = (e.State & DrawItemState.Selected) == DrawItemState.Selected
-                        ? Theme.Accent : Theme.TextMain;
-                    using (SolidBrush b = new SolidBrush(tc))
-                        e.Graphics.DrawString(cb.Items[e.Index].ToString(), e.Font, b, e.Bounds);
+                    _procLine[i] = new Label();
+                    _procLine[i].AutoSize = false;
+                    _procLine[i].Size = new Size(Theme.S(CW), 1);
+                    _procLine[i].Location = new Point(Theme.S(M), Theme.S(y + ProcRowH - 1));
+                    _procLine[i].BackColor = Theme.CardBorder;
+                    p.Controls.Add(_procLine[i]);
                 }
+            }
+        }
+
+        // ===== 网络页：速率 / 网卡 / 接入点 / IP / 延迟 =====
+        private void BuildNetworkPage()
+        {
+            Panel p = _pageNetwork;
+            p.Controls.Add(Lbl("\u2193", Theme.Ui, 15, Theme.TextSub, M, 18));
+            _lblDownNum = Lbl("--", Theme.Mono, 28, Theme.TextMain, M + 18, 6);
+            p.Controls.Add(_lblDownNum);
+            _lblDownUnit = Lbl("", Theme.Cn, 12, Theme.TextSub, 0, 0);
+            p.Controls.Add(_lblDownUnit);
+
+            p.Controls.Add(Lbl("\u2191", Theme.Ui, 15, Theme.TextSub, 200, 18));
+            _lblUpNum = Lbl("--", Theme.Mono, 28, Theme.TextMain, 218, 6);
+            p.Controls.Add(_lblUpNum);
+            _lblUpUnit = Lbl("", Theme.Cn, 12, Theme.TextSub, 0, 0);
+            p.Controls.Add(_lblUpUnit);
+
+            _lblSession = Lbl("", Theme.Cn, 11, Theme.TextDim, M, 52);
+            p.Controls.Add(_lblSession);
+
+            AddDivider(p, M, 74, CW);
+
+            int y = 86;
+            MakeRow(p, "网卡", y, 84, 296, out _rowTmp, out _lblNetNic);
+            y += ProcRowH;
+            MakeRow(p, "接入点", y, 84, 296, out _rowNetWifi, out _lblNetWifi);
+            y += ProcRowH;
+            MakeRow(p, "本地 IP", y, 84, 296, out _rowTmp, out _lblNetIp);
+            y += ProcRowH;
+            MakeRow(p, "延迟", y, 84, 218, out _rowTmp, out _lblNetPing);
+            _btnPing = new TextButton("重新检测");
+            _btnPing.Size = Theme.Sz(_btnPing.PreferredWidth(), 26);
+            PlaceRight(_btnPing, W - M, y + 2);
+            _btnPing.Click += delegate
+            {
+                if (_app == null) return;
+                _app.StartPing();
+                ApplyLive();
             };
-            return c;
+            p.Controls.Add(_btnPing);
+            y += ProcRowH;
+            MakeRow(p, "其它地址", y, 84, 296, out _rowNetOthers, out _lblNetOthers);
         }
 
-        // 风扇转速：fn9 轮询（游戏盒子同源数据）；EC 事件（id 26/32）仅作补充
-        private bool HasFanData()
+        // ---------------- 状态 → 界面 ----------------
+        /// <summary>把一份状态画到界面上（真实运行与离屏预览共用）</summary>
+        public void ApplyState(UiState s)
         {
-            return GetCpuRpm().HasValue || GetGpuRpm().HasValue;
-        }
-
-        private int? GetCpuRpm()
-        {
-            if (_app.FanStatus != null) return _app.FanStatus.CpuRpm;
-            return _app.FanWatcher != null ? _app.FanWatcher.CpuRpm : null;
-        }
-
-        private int? GetGpuRpm()
-        {
-            if (_app.FanStatus != null) return _app.FanStatus.GpuRpm;
-            return _app.FanWatcher != null ? _app.FanWatcher.GpuRpm : null;
-        }
-
-        // ---------------- 状态同步 ----------------
-        private void LoadState()
-        {
-            _suppressEvents = true;
+            if (s == null) return;
+            _state = s;
+            _suppress = true;
             try
             {
-                _tglAuto.Checked = _app.Settings.AutoEnabled;
-                _numLow.Value = (decimal)_app.Settings.LowThreshold;
-                _numHigh.Value = (decimal)_app.Settings.HighThreshold;
-                _numLow.Enabled = _tglAuto.Checked;
-                _numHigh.Enabled = _tglAuto.Checked;
+                // 仪表：CPU/GPU 环是温度，内存环是使用率
+                _gaugeCpu.SetValue(s.CpuTemp, Watts(s.CpuPower));
+                _gaugeGpu.SetValue(s.GpuTemp, Watts(s.GpuPower));
+                bool hasMem = s.MemTotalGB > 0;
+                _gaugeMem.SetValue(hasMem ? (double?)s.MemLoadPct : null,
+                    hasMem ? s.MemUsedGB.ToString("0.#") + " GB" : "");
 
-                if (!_app.Mifs.Available)
+                // 每个硬件一行：负载 · 频率 · 功耗 · 风扇
+                _lblCpuLoad.Text = Pct(s.CpuLoad);
+                _lblCpuClock.Text = s.CpuClockMHz.HasValue ? (s.CpuClockMHz.Value / 1000.0).ToString("0.#") + " GHz" : "--";
+                _lblCpuPwr.Text = WattsOrDash(s.CpuPower);
+                _lblCpuFan.Text = Rpm(s.FanA);
+                _lblGpuLoad.Text = Pct(s.GpuLoad);
+                _lblGpuClock.Text = s.GpuClockMHz.HasValue ? s.GpuClockMHz.Value.ToString("0") + " MHz" : "--";
+                _lblGpuPwr.Text = WattsOrDash(s.GpuPower);
+                _lblGpuFan.Text = Rpm(s.FanB);
+
+                // 档位
+                int pi = -1;
+                if (s.Profile.HasValue) pi = Array.IndexOf(ProfileOrder, s.Profile.Value);
+                _segProfiles.SelectedIndex = pi;
+                _segProfiles.Enabled = s.MifsAvailable;
+
+                // 自动联动
+                _tglAuto.Checked = s.AutoEnabled;
+                _tglAuto.Enabled = s.MifsAvailable;
+                _stpLow.SetValueQuiet((decimal)s.LowThreshold);
+                _stpHigh.SetValueQuiet((decimal)s.HighThreshold);
+                _stpLow.Enabled = s.AutoEnabled && s.MifsAvailable;
+                _stpHigh.Enabled = s.AutoEnabled && s.MifsAvailable;
+
+                // 触控板：开关只表示设备层；键盘快捷键那一层单独用标签提示
+                _tglTouchpad.Checked = s.TouchpadDeviceDisabled;
+                bool ecLocked = s.TouchpadEcValue.HasValue && s.TouchpadEcValue.Value == 0;
+                if (ecLocked) _pillTouchpadEc.Set("快捷键已锁定", Theme.Orange);
+                _pillTouchpadEc.Visible = ecLocked;
+
+                _tglWinKey.Checked = s.WinKeyLocked;
+
+                // Fn 锁（映射未独立验证：事件值 0 显示为"开"）
+                if (!s.FnLockValue.HasValue) _pillFnLock.Set("未检测到", Theme.TextDim);
+                else if (s.FnLockValue.Value == 0) _pillFnLock.Set("开", Theme.Orange);
+                else _pillFnLock.Set("关", Theme.Green);
+                _lblFnNote.Left = _pillFnLock.Right + Theme.S(10);
+
+                // GPU 模式
+                if (s.GpuMode.HasValue) _gpuModeDetected = s.GpuMode;
+                _segGpu.Enabled = s.MifsAvailable;
+                UpdateGpuUi();
+
+                _tglStartup.Checked = s.StartupEnabled;
+
+                if (s.MifsAvailable)
                 {
-                    _lblStatus.Text = "MIFS 不可用: " + _app.Mifs.InitError;
-                    _segProfiles.Enabled = false;
-                    _tglAuto.Enabled = false;
+                    string src = string.IsNullOrEmpty(s.TempSource) ? "" : "，温度与转速来自" + s.TempSource;
+                    _lblStatus.Text = "固件接口已连接" + src;
                 }
                 else
                 {
-                    _cboGpuMode.Items.Add("混合模式（双显卡）");
-                    _cboGpuMode.Items.Add("独显直连");
-                    // 当前模式按系统里集显是否可见来识别；识别不出就保持未选中，不去猜
-                    int? gpuMode = DetectGpuMode();
-                    if (gpuMode.HasValue)
-                        _cboGpuMode.SelectedIndex = gpuMode.Value;
-
-                    UpdateFnLockLabel();
-
-                    _tglTouchpad.Checked = TouchpadControl.IsDisabled();
-                    _tglStartup.Checked = StartupManager.IsEnabled();
+                    string err = s.MifsError ?? "";
+                    if (err.Length > 60) err = err.Substring(0, 60) + "…";
+                    _lblStatus.Text = "固件接口不可用" + (err.Length > 0 ? "：" + err : "");
                 }
+
+                ApplySystemPage(s);
+                ApplyNetworkPage(s);
             }
             finally
             {
-                _suppressEvents = false;
+                _suppress = false;
             }
-            HighlightProfile();
-            OnSensorsUi();
         }
 
-        private void UpdateFnLockLabel()
+        private void ApplySystemPage(UiState s)
         {
-            // Fn 锁状态只来自 EC 事件（id 7，按 Fn+Esc 时推送）。
-            // 0=开 / 1=关 这个映射是按用户对界面的反馈定的，还没有独立验证过；
-            // fn11 的读取值在本机恒为 1，不能当状态用，所以这里不做回退。
-            int? fn = _app.FanWatcher != null ? _app.FanWatcher.FnLockEventValue : (int?)null;
-            if (!fn.HasValue)
+            if (s.MemTotalGB > 0)
             {
-                _lblFnLockState.Text = "--（按 Fn+Esc 后显示）";
-                _lblFnLockState.ForeColor = Theme.TextDim;
+                _lblMemDetail.Text = s.MemUsedGB.ToString("0.#") + " / " + s.MemTotalGB.ToString("0.#") + " GB 已用"
+                    + "  ·  可用 " + s.MemAvailGB.ToString("0.#") + " GB"
+                    + (s.MemSpeedMHz.HasValue ? "  ·  " + s.MemSpeedMHz.Value.ToString("0") + "MHz" : "");
             }
             else
             {
-                _lblFnLockState.Text = fn.Value == 0 ? "开（Fn+Esc 切换）" : "关（Fn+Esc 切换）";
-                _lblFnLockState.ForeColor = fn.Value == 0 ? Theme.Orange : Theme.Green;
+                _lblMemDetail.Text = "读不到内存信息";
+            }
+
+            string batt = s.BatteryLevel.HasValue ? s.BatteryLevel.Value.ToString("0") + "%" : "--";
+            if (!string.IsNullOrEmpty(s.PowerText)) batt += "  ·  " + s.PowerText;
+            if (s.BatteryRateW.HasValue && s.BatteryRateW.Value >= 1)
+                batt += "  ·  " + (s.PowerText == "已接通电源" ? "充电 " : "放电 ") + s.BatteryRateW.Value.ToString("0.#") + " W";
+            if (s.BatteryHealthPct.HasValue) batt += "  ·  健康度 " + s.BatteryHealthPct.Value.ToString("0") + "%";
+            _lblBattDetail.Text = batt;
+
+            List<ProcessEntry> list = s.Processes ?? new List<ProcessEntry>();
+            _lblProcCount.Text = s.ProcessCount > 0 ? s.ProcessCount + " 个" : "";
+            _lblProcEmpty.Visible = list.Count == 0;
+            for (int i = 0; i < ProcRows; i++)
+            {
+                bool has = i < list.Count;
+                _procName[i].Visible = has;
+                _procMem[i].Visible = has;
+                _procKill[i].Visible = has;
+                if (i < ProcRows - 1)
+                    _procLine[i].Visible = has && i + 1 < list.Count;
+                if (!has) continue;
+                ProcessEntry e = list[i];
+                _procName[i].Text = e.Name;
+                _procMem[i].Text = e.MemoryText;
+                PlaceRight(_procMem[i], 296, ProcRow0 + i * ProcRowH + 8);
             }
         }
 
+        private void ApplyNetworkPage(UiState s)
+        {
+            NetSnapshot n = s.Net ?? new NetSnapshot();
+            SetSpeed(_lblDownNum, _lblDownUnit, n.HasLink ? (double?)n.DownKbps : null, M + 18, 6);
+            SetSpeed(_lblUpNum, _lblUpUnit, n.HasLink ? (double?)n.UpKbps : null, 218, 6);
+
+            _lblSession.Text = n.HasLink
+                ? "本次运行  \u2193 " + MegaBytes(n.SessionDownMB) + "   \u2191 " + MegaBytes(n.SessionUpMB)
+                : "";
+
+            _lblNetNic.Text = n.HasLink ? n.NicName + "  " + n.NicDesc : "未找到可用的网络连接";
+
+            bool showWifi = n.WifiConnected;
+            _rowNetWifi.Visible = showWifi;
+            if (showWifi) _lblNetWifi.Text = n.WifiText;
+
+            _lblNetIp.Text = n.HasLink ? n.Ip : "--";
+
+            _lblNetPing.Text = n.PingText;
+            _btnPing.Enabled = !n.PingRunning;
+
+            bool showOthers = n.Others != null && n.Others.Count > 0;
+            _rowNetOthers.Visible = showOthers;
+            if (showOthers) _lblNetOthers.Text = string.Join("      ", n.Others.ToArray());
+        }
+
+        private void SetSpeed(Label num, Label unit, double? kbps, int x, int y)
+        {
+            num.Left = Theme.S(x);
+            num.Top = Theme.S(y);
+            if (!kbps.HasValue)
+            {
+                num.Text = "--";
+                unit.Text = "";
+            }
+            else if (kbps.Value >= 1024)
+            {
+                num.Text = (kbps.Value / 1024).ToString("0.#");
+                unit.Text = "MB/s";
+            }
+            else
+            {
+                num.Text = kbps.Value.ToString("0");
+                unit.Text = "KB/s";
+            }
+            unit.Left = num.Right + Theme.S(6);
+            unit.Top = num.Bottom - unit.Height - Theme.S(3);
+        }
+
+        // ---------------- 格式化 ----------------
+        private static string Watts(double? w)
+        {
+            return w.HasValue ? w.Value.ToString("0") + " W" : "";
+        }
+
+        private static string WattsOrDash(double? w)
+        {
+            return w.HasValue ? w.Value.ToString("0") + " W" : "--";
+        }
+
+        private static string Pct(double? v)
+        {
+            return v.HasValue ? v.Value.ToString("0") + "%" : "--";
+        }
+
+        private static string Rpm(int? v)
+        {
+            return v.HasValue ? v.Value.ToString("0") + " RPM" : "--";
+        }
+
+        private static string MegaBytes(double mb)
+        {
+            return mb >= 1024 ? (mb / 1024).ToString("0.##") + " GB" : mb.ToString("0.#") + " MB";
+        }
+
+        private void UpdateGpuUi()
+        {
+            _suppress = true;
+            try
+            {
+                _segGpu.SelectedIndex = _gpuChoice;
+                bool live = _state.MifsAvailable;
+                _btnGpuApply.Enabled = live && _gpuChoice >= 0 && _gpuModeDetected.HasValue
+                    && _gpuChoice != _gpuModeDetected.Value;
+                if (_gpuModeDetected.HasValue)
+                    _lblGpuModeNote.Text = "当前为" + GpuModeNames[_gpuModeDetected.Value] + "，切换后重启生效";
+                else
+                    _lblGpuModeNote.Text = "无法识别当前模式，切换后重启生效";
+            }
+            finally
+            {
+                _suppress = false;
+            }
+        }
+
+        // ---------------- 后台事件 → UI 线程 ----------------
+        private void OnAppUpdated()
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+            try { BeginInvoke((Action)ApplyLive); }
+            catch (InvalidOperationException) { }
+        }
+
+        private void ApplyLive()
+        {
+            if (_app != null) ApplyState(UiState.Capture(_app));
+        }
+
+        // ---------------- 用户操作 ----------------
+        private void OnProfileSegmentChanged(object sender, EventArgs e)
+        {
+            if (_suppress || _app == null) return;
+            int i = _segProfiles.SelectedIndex;
+            if (i < 0 || i >= ProfileOrder.Length) return;
+            if (!_app.SwitchProfile(ProfileOrder[i]))
+            {
+                MessageBox.Show("档位切换失败：固件接口没有响应。", "MiCtl",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            // 以固件回读的真实档位为准（失败时分段会滑回原档位）
+            ApplyLive();
+        }
+
+        private void ThresholdChanged()
+        {
+            if (_suppress || _app == null) return;
+            double low = (double)_stpLow.Value;
+            double high = (double)_stpHigh.Value;
+            if (low >= high) low = high - 1;          // 保持 静谧阈值 < 极速阈值
+            _app.Settings.LowThreshold = low;
+            _app.Settings.HighThreshold = high;
+            _app.SaveSettings();
+            ApplyLive();
+        }
+
+        private void KillAt(int i)
+        {
+            if (_app == null) return;
+            List<ProcessEntry> list = _state.Processes ?? new List<ProcessEntry>();
+            if (i < 0 || i >= list.Count) return;
+            ProcessEntry e = list[i];
+            if (SystemInfo.IsCritical(e.Name))
+            {
+                MessageBox.Show(e.Name + " 是系统关键进程，不能在这里结束。", "MiCtl",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            string msg = "结束 " + e.Name + "？" +
+                (e.Pids.Count > 1 ? "\n\n它有 " + e.Pids.Count + " 个进程，占用 " + e.MemoryText + "。" : "\n\n它占用 " + e.MemoryText + "。") +
+                "\n该程序里没有保存的内容会丢失。";
+            if (MessageBox.Show(msg, "MiCtl", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+            string err = _app.KillProcesses(e);
+            if (err != null)
+            {
+                MessageBox.Show(err, "MiCtl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            ApplyLive();
+        }
+
         /// <summary>
-        /// 通过系统实际显卡状态识别 GPU 模式：
-        /// 混合模式下 AMD 集显（Radeon Graphics）作为适配器可见；独显直连时消失。
+        /// 通过系统实际显卡状态识别 GPU 模式：混合模式下 AMD 集显作为适配器可见；独显直连时消失。
+        /// 这是推断，没有独立验证过。
         /// </summary>
         private static int? DetectGpuMode()
         {
             try
             {
                 bool hasAmdIgpu = false;
-                using (System.Management.ManagementObjectSearcher searcher =
-                    new System.Management.ManagementObjectSearcher("SELECT Name, Status FROM Win32_VideoController"))
+                using (ManagementObjectSearcher searcher =
+                    new ManagementObjectSearcher("SELECT Name, Status FROM Win32_VideoController"))
                 {
-                    foreach (System.Management.ManagementObject o in searcher.Get())
+                    foreach (ManagementObject o in searcher.Get())
                     {
                         string name = (o["Name"] as string) ?? "";
                         string status = (o["Status"] as string) ?? "";
@@ -640,30 +819,53 @@ namespace MiCtl
             }
         }
 
-        private void HighlightProfile()
-        {
-            _segProfiles.Selected = _app.CurrentProfile;
-        }
-
         private void ApplyGpuMode()
         {
-            if (_cboGpuMode.SelectedIndex < 0) return;
-            int mode = _cboGpuMode.SelectedIndex;
-            string name = mode == 0 ? "混合模式" : "独显直连";
+            if (_app == null || _gpuChoice < 0) return;
+            string name = GpuModeNames[_gpuChoice];
             if (MessageBox.Show(
-                    "将向固件发送切换到「" + name + "」的指令。\n\n" +
-                    "这个功能在本机还没有验证过是否真的生效（要重启才能看到结果）。\n确定发送吗？",
-                    "MiCtl", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    "向固件发送切换到「" + name + "」的指令。\n\n" +
+                    "这个功能在本机还没有验证过是否真的生效，要重启才能看到结果。确定发送吗？",
+                    "MiCtl", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+
+            if (_app.Mifs.SetGpuMode(_gpuChoice))
             {
-                if (_app.Mifs.SetGpuMode(mode))
-                    MessageBox.Show(
-                        "固件已接受指令。\n\n" +
-                        "是否真的切换成功要重启后才能确认。如果重启后模式没变，" +
-                        "说明这台机器不支持软件切换，请在 BIOS 里设置。",
-                        "MiCtl", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                else
-                    MessageBox.Show("指令未被固件接受。", "MiCtl",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "固件已接受指令。\n\n是否真的切换成功要重启后才能确认。如果重启后模式没变，" +
+                    "说明这台机器不支持软件切换，请在 BIOS 里设置。",
+                    "MiCtl", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("指令没有被固件接受。", "MiCtl",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            // 发送后回到"当前识别到的模式"，避免界面假装已经切换
+            _gpuChoice = _gpuModeDetected.HasValue ? _gpuModeDetected.Value : -1;
+            UpdateGpuUi();
+        }
+
+        /// <summary>预览用：把所有控件的过渡动画直接停到终点</summary>
+        public void FinishAnimations()
+        {
+            FinishAnimationsCore(this);
+        }
+
+        private static void FinishAnimationsCore(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                GaugeRing gr = c as GaugeRing;
+                if (gr != null) gr.Jump();
+                Segmented sg = c as Segmented;
+                if (sg != null) sg.Jump();
+                ToggleSwitch ts = c as ToggleSwitch;
+                if (ts != null) ts.Jump();
+                TabStrip tb = c as TabStrip;
+                if (tb != null) tb.Jump();
+                FinishAnimationsCore(c);
             }
         }
 
@@ -676,93 +878,6 @@ namespace MiCtl
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        // ---------------- 后台事件 marshaling ----------------
-        private void OnSensorsUpdatedThread()
-        {
-            try { BeginInvoke((Action)OnSensorsUi); }
-            catch { }
-        }
-
-        private void OnProfileChangedThread()
-        {
-            try { BeginInvoke((Action)delegate
-            {
-                HighlightProfile();
-                UpdateFnLockLabel();
-            }); }
-            catch { }
-        }
-
-        private void OnSensorsUi()
-        {
-            // 触控板：EC 事件状态（value 0=禁用 / 1=启用，键盘快捷键切换）与设备禁用任一即视为禁用
-            _suppressEvents = true;
-            try
-            {
-                int? ecTp = _app.FanWatcher != null ? _app.FanWatcher.TouchpadEventValue : (int?)null;
-                bool ecDisabled = ecTp.HasValue && ecTp.Value == 0;
-                _tglTouchpad.Checked = ecDisabled || TouchpadControl.IsDisabled();
-            }
-            finally { _suppressEvents = false; }
-
-            // CPU / GPU 温度：AppController 已选好来源（固件上报优先，其次传感器库）
-            if (_app.CpuTemp.HasValue)
-            {
-                double t = _app.CpuTemp.Value;
-                _lblCpuTemp.Text = t.ToString("0") + "°";
-                _dotCpu.DotColor = Theme.TempColor(t);
-            }
-            else
-            {
-                _lblCpuTemp.Text = "--";
-                _dotCpu.DotColor = Theme.TextDim;
-            }
-
-            if (_app.GpuTemp.HasValue)
-            {
-                double t = _app.GpuTemp.Value;
-                _lblGpuTemp.Text = t.ToString("0") + "°";
-                _dotGpu.DotColor = Theme.TempColor(t);
-            }
-            else
-            {
-                _lblGpuTemp.Text = "--";
-                _dotGpu.DotColor = Theme.TextDim;
-            }
-
-            _lblGpuDetail.Text = "GPU 负载 " +
-                (_app.Sensors.GpuLoad.HasValue ? _app.Sensors.GpuLoad.Value.ToString("0") + "%" : "--%") +
-                "  ·  功耗 " +
-                (_app.Sensors.GpuPower.HasValue ? _app.Sensors.GpuPower.Value.ToString("0.#") + "W" : "--W") +
-                (_app.Sensors.CpuPower.HasValue
-                    ? "  ·  CPU " + _app.Sensors.CpuPower.Value.ToString("0.#") + "W"
-                    : "");
-
-            // 状态行：如实写明数据来源
-            if (_app.Mifs.Available)
-                _lblStatus.Text = "固件接口已连接  ·  温度/转速来源：" +
-                    (_app.FanStatus != null ? "固件（与游戏盒子同源）" : "传感器库");
-
-            // 网速 + 风扇转速
-            string netPart = "↓ " + FormatSpeed(_app.Sensors.DownKbps) +
-                             "  ↑ " + FormatSpeed(_app.Sensors.UpKbps);
-            string fanPart = "";
-            if (HasFanData())
-            {
-                string cpu = GetCpuRpm().HasValue ? GetCpuRpm().Value.ToString() : "--";
-                string gpu = GetGpuRpm().HasValue ? GetGpuRpm().Value.ToString() : "--";
-                fanPart = "  ·  风扇 " + cpu + " / " + gpu + " RPM";
-            }
-            _lblNetFan.Text = netPart + fanPart;
-        }
-
-        private static string FormatSpeed(double kbps)
-        {
-            if (kbps >= 1024)
-                return (kbps / 1024).ToString("0.#") + " MB/s";
-            return kbps.ToString("0.#") + " KB/s";
         }
     }
 }
