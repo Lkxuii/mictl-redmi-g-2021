@@ -69,6 +69,10 @@ foreach ($s in $srcFiles) { $args.Add($s) }
 & $csc $args.ToArray()
 
 if ($LASTEXITCODE -eq 0) {
+    # 产物自检：安全软件可能把刚编译出的未签名 exe 实时隔离（csc 返回成功但文件不在）
+    if (-not (Test-Path (Join-Path $out 'MiCtl.exe'))) {
+        Write-Output 'BUILD OK 但 out\MiCtl.exe 不在：刚生成的产物极可能被安全软件实时监控隔离了（见 README「安全软件误报说明」）'
+    }
     # 运行时依赖随产物输出
     foreach ($f in $lhmFiles) {
         if ($f -ne 'LibreHardwareMonitorLib.dll') {
