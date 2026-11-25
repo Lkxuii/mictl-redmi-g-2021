@@ -82,6 +82,9 @@ bitland-mifs-wmi.c      Linux 内核驱动参考副本（第三方，GPL）
 | 触控板事件 `value 0` 时触控板不能用 | 用户对照确认 |
 | Fn 锁语义（用户 2026-11-26 确认，纠正了他此前"fn 开 = 媒体键"的说法）：**锁定 = F1–F12 是正常功能键（F1 就是 F1）；解锁 = F1–F12 是媒体键（音量/亮度）** | 用户原话："锁定应该是正常的f1，解锁才是音量" |
 | EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
+| EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
+| **fn11 SET 不能切换 Fn 锁**：SET 0/1 都返回成功，但 12 秒内无 EC 事件 id7、GET 恒为 1、行为无变化 | probe/FnLockProbe.cs → fnlock-probe.txt（提权探针） |
+| root\WMI 里带方法的类只有 MICommonInterface 一个；游戏盒子封装的 Inventec/Quanta WMI 类（inventec_sync_operation::EnableFnKey 等）在本机不存在——它的 Fn 软件切换通道在这台机器上同样不可用 | root\WMI 全量类枚举（Get-CimClass）；rev/rtti.txt |
 | GPU 模式识别（Radeon 集显不可见 = 独显直连）方向已验证：当前确为独显直连，界面识别一致；混合模式方向未验证（用户未切换过） | 用户确认（2026-11-26）："当前就是独显直连" |
 | 新增监控项都能在本机读到真实值：CPU 负载、GPU 核心频率与显存、内存（使用率 / 已用 / 可用 / 频率）、电池、默认网卡与网速、WiFi、延迟、进程榜 | `probe/sysprobe.txt`（13:48 提权诊断，列出全部传感器）；`probe/appcheck.txt`（普通权限，5 轮） |
 | 游戏盒子监控页的 GPU 频率与温度和传感器库同源 | 它显示 1567 MHz / 49°C，`probe/lhm-diag-final.txt` 里 `GPU Core` 时钟是 1567、温度 49 |
@@ -110,7 +113,7 @@ fn9 的一条实际响应（30 字节）：
 
 ### 第二优先：用户点名要、但没做到位的
 
-5. **"解锁 Fn"目前只有状态显示，没有切换**。游戏盒子的前端有 `set_a7_fn_key_status`，说明它能软件切换。fn11 写入 0 之后读回来仍是 1，但 fn11 的读数可能根本不反映状态，所以"固件不接受软件切换"这个结论不成立，需要换方法验证（写入后看 EC 事件 id 7 是否变化，或让用户看 F1 键的行为）。
+5. **软件切换 Fn 锁：已验证不可行，不做开关**。fn11 SET 返回成功但不生效（探针实测，见第 4 节）；游戏盒子走的是 Inventec/Quanta WMI 类，本机没有这些类；EC 直写没有可靠偏移、风险高。所以 Fn 锁只有 Fn+Esc 一条切换路，界面保持状态显示（pill + 悬停显示官方解锁键位表）。若将来拿到 EC 偏移或新版 BIOS，再评估。
 6. **触控板的两层状态已经拆开显示，但没实测。** 界面开关现在只表示并控制设备层（pnputil）；键盘快捷键那一层（EC 事件，启动后没收到过事件时未知）单独用一个"快捷键已锁定"标签提示。原来两层合在一个开关上、取消禁用后会弹回去的问题，在逻辑上不再出现，但没有在真实窗口里验证过。
 7. **游戏盒子在这台机器上到底怎么实现触控板 / Fn 锁 / Win 键锁的切换，没有查清**。前端有 `set_a7_touchpad_status`、`set_a7_fn_key_status`、`set_a7_windows_key_status`、`set_a7_down_key_mode`。固件接口的 fn12（驱动里标为触控板锁）在本机返回不支持。`rev/rtti.txt` 里能看到 `EnableTouchpad` / `DisableFnKey` / `GetDownKeyMode` 等类名，但它们挂在 `inventec_sync_operation` 和 `syncoperation` 两个命名空间下，二进制里没有 Bitland 字样，也没有 Inventec / Quanta 的 WMI 类名——没有证据表明本机走这些类。
 8. **GPU 模式切换是否生效**。固件会接受 fn9 的写入并返回成功，但读不回模式，要重启才知道结果，没试过。从游戏盒子前端代码看，这个功能只对 A7SR 机型开放。界面的提示语已经改成如实表述。

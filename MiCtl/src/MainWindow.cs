@@ -57,6 +57,7 @@ namespace MiCtl
         private ToggleSwitch _tglAuto, _tglTouchpad, _tglWinKey, _tglStartup;
         private Stepper _stpLow, _stpHigh;
         private StatusPill _pillTouchpadEc, _pillFnLock;
+        private ToolTip _tips;
         private AccentButton _btnGpuApply;
         private Label _lblFnNote, _lblGpuModeNote, _lblStatus;
 
@@ -179,6 +180,8 @@ namespace MiCtl
         // ---------------- UI 构建 ----------------
         private void BuildUi()
         {
+            _tips = new ToolTip();
+
             // ===== 标题栏 =====
             Panel bar = new Panel();
             bar.Bounds = Theme.R(0, 0, W, 48);
@@ -370,8 +373,13 @@ namespace MiCtl
             p.Controls.Add(Lbl("Fn 锁", Theme.Cn, 13, Theme.TextMain, M, y + 11));
             _pillFnLock = new StatusPill();
             _pillFnLock.Location = Theme.P(M + 92, y + 8);
+            _tips.SetToolTip(_pillFnLock,
+                "Fn+Esc 切换（本机固件不支持软件切换）。\n" +
+                "解锁时：F1 静音 · F2/F3 音量 · F4/F5 亮度 · F6 投影 · F9 触控板 · F10 键盘灯 · F11 截屏 · F12 插入\n" +
+                "锁定时：F1–F12 为功能键");
             p.Controls.Add(_pillFnLock);
-            _lblFnNote = Lbl("锁定 = F1–F12 为功能键；解锁 = 音量/亮度；Fn+Esc 切换", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
+            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
+            _tips.SetToolTip(_lblFnNote, _tips.GetToolTip(_pillFnLock));
             p.Controls.Add(_lblFnNote);
 
             // GPU 模式
