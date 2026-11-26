@@ -1,0 +1,51 @@
+MIFS 可用: True
+EC 全事件订阅: 已启动。基线观察 2 秒：
+
+>>> SET fn10 [00]，观察 3 秒：
+    SET 返回: True
+    [   2.0s] EC 事件 type=1 id=6 value=1
+    [   2.0s] EC 事件 type=1 id=6 value=1
+
+>>> SET fn10 [00]，观察 3 秒：
+    SET 返回: True
+    [   5.0s] EC 事件 type=1 id=6 value=1
+
+>>> SET fn10 [01]，观察 3 秒：
+    SET 返回: True
+    [   8.1s] EC 事件 type=1 id=7 value=0
+    [   8.1s] EC 事件 type=1 id=7 value=0
+
+>>> SET fn10 [01]，观察 3 秒：
+    SET 返回: True
+    [  11.1s] EC 事件 type=1 id=7 value=0
+    [  11.1s] EC 事件 type=1 id=7 value=0
+
+>>> SET fn10 [02]，观察 3 秒：
+    SET 返回: True
+    （无 EC 事件）
+
+>>> SET fn10 [03]，观察 3 秒：
+    SET 返回: False
+    （无 EC 事件）
+
+>>> SET fn10 [04]，观察 3 秒：
+    SET 返回: False
+    （无 EC 事件）
+
+>>> SET fn10 [05]，观察 3 秒：
+    SET 返回: False
+    （无 EC 事件）
+
+>>> SET fn10 [06]，观察 3 秒：
+    SET 返回: False
+    （无 EC 事件）
+
+结束时全部事件回放：
+    [   2.0s] EC 事件 type=1 id=6 value=1
+    [   2.0s] EC 事件 type=1 id=6 value=1
+    [   5.0s] EC 事件 type=1 id=6 value=1
+    [   5.0s] EC 事件 type=1 id=6 value=1
+    [   8.1s] EC 事件 type=1 id=7 value=0
+    [   8.1s] EC 事件 type=1 id=7 value=0
+    [  11.1s] EC 事件 type=1 id=7 value=0
+    [  11.1s] EC 事件 type=1 id=7 value=0

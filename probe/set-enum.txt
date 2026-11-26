@@ -1,0 +1,31 @@
+MIFS 可用: True
+当前档位 fn8: 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== 第 1 步：SET {0} 快速扫描（fn 0-255）===
+    fn8 (0x08) SET {0} 成功
+    fn10 (0x0A) SET {0} 成功
+    fn11 (0x0B) SET {0} 成功
+SET 有效的功能码: 8, 10, 11
+
+=== 第 2 步：SET {1} + 观察 EC 事件（找 id7 value1 = Fn 锁定）===
+>>> SET fn10 {1}，观察 3 秒：
+    SET 返回: True
+    [   1.1s] EC 事件 type=1 id=7 value=0
+    [   1.1s] EC 事件 type=1 id=7 value=0
+    >>> 该功能码可解锁 Fn！尝试 payload {0} 锁定：
+    SET 返回: True
+    （无 EC 事件——锁定方向可能不生效）
+>>> SET fn11 {1}，观察 3 秒：
+    SET 返回: True
+    （无 EC 事件）
+已恢复档位 fn8 -> 0
+
+结束时全部事件回放：
+    [   0.3s] EC 事件 type=1 id=22 value=3
+    [   0.3s] EC 事件 type=1 id=22 value=3
+    [   0.3s] EC 事件 type=1 id=6 value=1
+    [   0.3s] EC 事件 type=1 id=6 value=1
+    [   1.1s] EC 事件 type=1 id=7 value=0
+    [   1.1s] EC 事件 type=1 id=7 value=0
+    [   4.1s] EC 事件 type=1 id=6 value=1
+    [   7.1s] EC 事件 type=1 id=6 value=1

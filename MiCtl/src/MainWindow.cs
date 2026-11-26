@@ -56,8 +56,8 @@ namespace MiCtl
         private Segmented _segProfiles, _segGpu;
         private ToggleSwitch _tglAuto, _tglTouchpad, _tglWinKey, _tglStartup;
         private Stepper _stpLow, _stpHigh;
-        private StatusPill _pillTouchpadEc;
-        private ToggleSwitch _tglFnLock;
+        private StatusPill _pillTouchpadEc, _pillFnLock;
+        private GhostButton _btnUnlockFn;
         private ToolTip _tips;
         private AccentButton _btnGpuApply;
         private Label _lblFnNote, _lblGpuModeNote, _lblStatus;
@@ -371,28 +371,34 @@ namespace MiCtl
             AddDivider(p, M, y + RowH, CW);
 
             y += RowH;
+            // Fn 锁：软件只能解锁（fn10 SET {1}，探针验证有效）；"锁定"方向本机固件没有 MIFS 通道
+            //（SET 全枚举只有 fn8/fn10/fn11 三个活码，fn10 {0} 是触控板动作），锁定请按 Fn+Esc。
             string fnTip =
-                "Fn+Esc 或此开关切换（固件 fn10 功能码）。\n" +
+                "Fn+Esc 切换；解锁也可点右侧按钮（固件 fn10 功能码）。\n" +
                 "解锁时：F1 静音 · F2/F3 音量 · F4/F5 亮度 · F6 投影 · F9 触控板 · F10 键盘灯 · F11 截屏 · F12 插入\n" +
-                "锁定时：F1–F12 为功能键";
+                "锁定时：F1–F12 为功能键（软件无法锁定，请按 Fn+Esc）";
             p.Controls.Add(Lbl("Fn 锁", Theme.Cn, 13, Theme.TextMain, M, y + 11));
-            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, M + 92, y + 12);
+            _pillFnLock = new StatusPill();
+            _pillFnLock.Location = Theme.P(M + 92, y + 8);
+            _tips.SetToolTip(_pillFnLock, fnTip);
+            p.Controls.Add(_pillFnLock);
+            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
             _tips.SetToolTip(_lblFnNote, fnTip);
             p.Controls.Add(_lblFnNote);
-            _tglFnLock = new ToggleSwitch();
-            _tglFnLock.Bounds = Theme.R(ToggleRight, y + 7, 44, 24);
-            _tips.SetToolTip(_tglFnLock, fnTip);
-            _tglFnLock.CheckedChanged += delegate
+            _btnUnlockFn = new GhostButton("解锁 Fn");
+            _btnUnlockFn.Bounds = Theme.R(W - M - 88, y + 5, 88, 28);
+            _tips.SetToolTip(_btnUnlockFn, "把 Fn 切到解锁（F1–F12 出媒体功能）。\n锁定方向固件未开放，请按 Fn+Esc。");
+            _btnUnlockFn.Click += delegate
             {
-                if (_suppress || _app == null) return;
-                if (!_app.SetFnLock(_tglFnLock.Checked))
+                if (_app == null) return;
+                if (!_app.SetFnLock(false))
                 {
                     MessageBox.Show("Fn 锁切换失败：固件接口没有响应。", "MiCtl",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 ApplyLive();
             };
-            p.Controls.Add(_tglFnLock);
+            p.Controls.Add(_btnUnlockFn);
 
             // GPU 模式
             p.Controls.Add(Lbl("GPU 模式", Theme.Cn, 11, Theme.TextSub, 22, 320));
@@ -577,14 +583,20 @@ namespace MiCtl
                 _tglWinKey.Checked = s.WinKeyLocked;
 
                 // Fn 锁（已对照确认：value 1 = 锁定/F1–F12 功能键，value 0 = 解锁/媒体键）。
-                // 软件切换（fn10）发出后的 3 秒确认窗口内不回写，等 EC 事件到位。
-                bool fnLockOn = s.FnLockValue.HasValue && s.FnLockValue.Value == 1;
-                if (!_app.FnLockPending) _tglFnLock.Checked = fnLockOn;
-                _tglFnLock.Enabled = s.MifsAvailable;
+                // 软件切换只有解锁方向（fn10 SET {1}）；锁定方向固件未开放（SET 全枚举验证），请按 Fn+Esc。
+                // 解锁按钮发出后的 3 秒确认窗口内不回写，等 EC 事件到位。
+                int fnv = s.FnLockValue ?? -1;
+                if (!_app.FnLockPending)
+                {
+                    _pillFnLock.Set(fnv == 1 ? "已锁定" : (fnv == 0 ? "已解锁" : "未检测到"),
+                        fnv == 1 ? Theme.Green : (fnv == 0 ? Theme.Orange : Theme.TextDim));
+                    _btnUnlockFn.Visible = fnv == 1;
+                }
+                _btnUnlockFn.Enabled = s.MifsAvailable;
                 if (_app.FnLockFailed)
                 {
                     _app.ClearFnLockFailed();
-                    MessageBox.Show("Fn 锁切换未生效：固件没有确认状态变化。", "MiCtl",
+                    MessageBox.Show("Fn 解锁未生效：固件没有确认状态变化。", "MiCtl",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
