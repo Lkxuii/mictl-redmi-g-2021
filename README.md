@@ -34,6 +34,10 @@ pwsh -File MiCtl/build.ps1
 
 依赖缺失时会自动下载 LibreHardwareMonitor 0.9.6。已用干净克隆验证过可以一次编译通过。
 
+## 下载
+
+成品（MiCtl.exe + 运行时依赖的 zip）在 [Releases](https://github.com/Lkxuii/mictl-redmi-g-2021/releases) 页面：推送 `v*` 标签后由 GitHub Actions 自动构建发布。当前版本 v1.1.0.0。
+
 ## 安全软件误报说明
 
 用 .NET 自带 csc.exe 自行编译出的 `MiCtl.exe` 没有数字签名，可能被启发式引擎误报（开发机上的火绒将其判为 Backdoor/Steam，编译输出落地即被隔离）。程序需要管理员权限是为了调用笔记本固件的 WMI 接口；包含低级键盘钩子是「禁用 Win 键」功能所需。处理方式：把编译输出目录加入安全软件信任区，或提交误报申诉（模板见 [docs/火绒误报申诉.md](docs/火绒误报申诉.md)）。

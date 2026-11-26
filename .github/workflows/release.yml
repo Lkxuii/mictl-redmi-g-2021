@@ -1,0 +1,64 @@
+name: Release
+
+# 推送 v* 标签时自动构建并发布 Release（附成品 zip）
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python（生成 .res 资源用）
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build（csc 编译 + 依赖自动下载 + 资源嵌入）
+        shell: pwsh
+        run: ./MiCtl/build.ps1
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist | Out-Null
+          Copy-Item MiCtl/out/MiCtl.exe dist/
+          Copy-Item MiCtl/out/*.dll dist/
+          Compress-Archive -Path dist/* -DestinationPath "MiCtl-${{ github.ref_name }}.zip"
+          Get-ChildItem dist | ForEach-Object { Write-Output ("  " + $_.Name + "  " + $_.Length) }
+
+      - name: Release
+        uses: softprops/action-github-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: MiCtl-${{ github.ref_name }}.zip
+          body: |
+            MiCtl —— Redmi G 2021 锐龙版（TIMI A7S）轻量控制台
+
+            ## 使用
+            解压后右键以管理员身份运行 `MiCtl.exe`（固件 WMI 接口需要管理员权限）。
+
+            ## 功能
+            - 性能档位（静谧 / 均衡 / 极速）
+            - CPU / GPU / 内存三环监控（温度、频率、功耗、风扇转速）
+            - 内存占用前 5 进程（可结束）、网络详情（网卡 / 接入点 / 延迟）
+            - Fn 锁状态显示与一键解锁、触控板开关（两层联动）
+            - 温度自动联动（双阈值可调）、开机自启（计划任务）
+
+            ## 本机（A7S）固件的已知边界
+            - Fn 锁定方向：请按 Fn+Esc（固件只开放了解锁方向，见仓库 README）
+            - GPU 模式切换：请重启进 BIOS（固件未开放软件切换）
+            - 触控板的 EC 层锁定：请按 Fn+F9（MiCtl 能启用、不能软件禁用这一层）
+
+            ## 安全软件提示
+            未签名的 exe 可能被安全软件的启发式引擎误报（如把 MiCtl.exe 误判为 Backdoor/Steam）。
+            处理方式见仓库 docs/火绒误报申诉.md。
+
+            源码与构建方法见仓库 README。
