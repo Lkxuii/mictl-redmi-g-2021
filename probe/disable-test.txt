@@ -1,0 +1,22 @@
+=== disable COL02 ===
+exit: 0
+  t+1 x0.8s: COL02 错误码 = 22
+  t+2 x0.8s: COL02 错误码 = 22
+  t+3 x0.8s: COL02 错误码 = 22
+  t+4 x0.8s: COL02 错误码 = 22
+  t+5 x0.8s: COL02 错误码 = 22
+=== 立即恢复 enable COL02 ===
+exit: 0
+  COL02 错误码 = 0
+--- pnputil disable 输出 ---
+Microsoft PnP ����
+
+���ڽ����豸:          HID\MSFT0001&COL02\4&1230323B&2&0001
+�ѳɹ������豸��
+
+--- pnputil enable 输出 ---
+Microsoft PnP ����
+
+���������豸:          HID\MSFT0001&COL02\4&1230323B&2&0001
+�ѳɹ������豸��
+

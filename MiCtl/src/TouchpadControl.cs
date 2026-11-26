@@ -1,9 +1,12 @@
-// 触控板控制 —— 通过 pnputil 禁用/启用精密触控板 HID 设备
-// 本机 BIOS 不支持 MIFS fn12，改用 Windows 设备层控制
+// 触控板控制 —— 设备层禁用/启用精密触控板 HID 设备。
+// 实现：cfgmgr32 的 CM_Locate_DevNode/CM_Disable_DevNode/CM_Enable_DevNode，进程内直接调用。
+// 早期版本用 pnputil 子进程，但未签名的 MiCtl 启动 pnputil 禁用设备会被火绒的行为防御拦下（拒绝访问），
+// 而 CM_ API 无子进程特征。若 CM_ API 也被拦，只能靠把 MiCtl.exe 加入火绒的行为白名单。
+// 本机 BIOS 不支持 MIFS fn12，EC 层的触控板锁只能键盘 Fn+F9（fn10 只有"启用"方向）。
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace MiCtl
@@ -60,20 +63,25 @@ namespace MiCtl
             return false;
         }
 
-        private static int RunPnP(string args)
+        [DllImport("cfgmgr32.dll", CharSet = CharSet.Unicode)]
+        private static extern int CM_Locate_DevNodeW(out IntPtr pdnDevInst, string pDeviceID, uint ulFlags);
+
+        [DllImport("cfgmgr32.dll")]
+        private static extern int CM_Disable_DevNode(IntPtr dnDevInst, uint ulFlags);
+
+        [DllImport("cfgmgr32.dll")]
+        private static extern int CM_Enable_DevNode(IntPtr dnDevInst, uint ulFlags);
+
+        private const uint CM_LOCATE_DEVNODE_NORMAL = 0x00000000;
+
+        /// <summary>对单个设备实例执行禁用/启用（cfgmgr32，进程内调用，无子进程）</summary>
+        private static bool SetDeviceEnabled(string deviceId, bool enable)
         {
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = "pnputil.exe";
-            psi.Arguments = args;
-            psi.UseShellExecute = false;
-            psi.CreateNoWindow = true;
-            psi.RedirectStandardOutput = true;
-            using (Process p = Process.Start(psi))
-            {
-                p.StandardOutput.ReadToEnd();
-                p.WaitForExit(8000);
-                return p.ExitCode;
-            }
+            IntPtr dn;
+            int cr = CM_Locate_DevNodeW(out dn, deviceId, CM_LOCATE_DEVNODE_NORMAL);
+            if (cr != 0) return false;                       // CR_SUCCESS = 0
+            cr = enable ? CM_Enable_DevNode(dn, 0) : CM_Disable_DevNode(dn, 0);
+            return cr == 0;
         }
 
         public static bool SetDisabled(bool disable)
@@ -85,12 +93,10 @@ namespace MiCtl
                 int ok = 0;
                 foreach (string id in ids)
                 {
-                    string verb = disable ? "/disable-device" : "/enable-device";
-                    int rc = RunPnP(verb + " \"" + id + "\"");
-                    if (rc == 0) ok++;
+                    if (SetDeviceEnabled(id, !disable)) ok++;
                 }
                 if (ok == 0) return false;
-                // pnputil 的 enable/disable 是异步生效的：复查实际状态，没切过去就算失败
+                // 设备状态的切换是异步生效的：复查实际状态，没切过去就算失败
                 //（否则开关会显示"已启用"但触控板不动）。
                 Thread.Sleep(1500);
                 bool now = IsDisabled();
