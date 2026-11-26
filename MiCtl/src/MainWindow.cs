@@ -25,7 +25,7 @@ namespace MiCtl
         private const int PageY = 316;
         private const int RowH = 38;                       // 控制页列表行高
         private const int ToggleRight = W - M - 44;
-        private static readonly int[] PageHeights = { 470, 274, 252 };   // 控制 / 系统 / 网络
+        private static readonly int[] PageHeights = { 440, 274, 252 };   // 控制 / 系统 / 网络
 
         private static readonly string[] PageNames = { "控制", "系统", "网络" };
         private static readonly MifsClient.Profile[] ProfileOrder =
@@ -41,7 +41,6 @@ namespace MiCtl
         private UiState _state = new UiState();
         private bool _suppress;
         private int? _gpuModeDetected;
-        private int _gpuChoice = -1;
 
         // 仪表
         private GaugeRing _gaugeCpu, _gaugeGpu, _gaugeMem;
@@ -53,13 +52,13 @@ namespace MiCtl
         private Panel _pageControl, _pageSystem, _pageNetwork;
 
         // 控制页
-        private Segmented _segProfiles, _segGpu;
+        private Segmented _segProfiles;
         private ToggleSwitch _tglAuto, _tglTouchpad, _tglWinKey, _tglStartup;
         private Stepper _stpLow, _stpHigh;
         private StatusPill _pillTouchpadEc, _pillFnLock;
         private GhostButton _btnUnlockFn;
         private ToolTip _tips;
-        private AccentButton _btnGpuApply;
+        private Label _lblGpuModeValue;
         private Label _lblFnNote, _lblGpuModeNote, _lblStatus;
 
         // 系统页
@@ -97,7 +96,6 @@ namespace MiCtl
             BuildUi();
 
             _gpuModeDetected = DetectGpuMode();
-            _gpuChoice = _gpuModeDetected.HasValue ? _gpuModeDetected.Value : -1;
 
             if (_app != null)
             {
@@ -406,29 +404,18 @@ namespace MiCtl
             };
             p.Controls.Add(_btnUnlockFn);
 
-            // GPU 模式
-            p.Controls.Add(Lbl("GPU 模式", Theme.Cn, 11, Theme.TextSub, 22, 320));
-            _lblGpuModeNote = Lbl("", Theme.Cn, 11, Theme.TextDim, 92, 322);
+            // GPU 模式：只显示当前模式（A7S 的固件未开放软件切换——fn9 SET 被拒，游戏盒子该功能也仅 A7SR）
+            p.Controls.Add(Lbl("GPU 模式", Theme.Cn, 13, Theme.TextMain, M, 320));
+            _lblGpuModeValue = Lbl("", Theme.Cn, 11.5f, Theme.TextMain, 92, 322);
+            p.Controls.Add(_lblGpuModeValue);
+            _lblGpuModeNote = Lbl("切换需重启进 BIOS（本机固件未开放软件切换）", Theme.Cn, 11, Theme.TextDim, 92, 342);
             p.Controls.Add(_lblGpuModeNote);
-            _segGpu = new Segmented(GpuModeNames, new[] { Theme.Accent, Theme.Accent }, true);
-            _segGpu.Bounds = Theme.R(M, 342, 244, 36);
-            _segGpu.SelectedChanged += delegate
-            {
-                if (_suppress) return;
-                _gpuChoice = _segGpu.SelectedIndex;
-                UpdateGpuUi();
-            };
-            p.Controls.Add(_segGpu);
-            _btnGpuApply = new AccentButton("应用");
-            _btnGpuApply.Bounds = Theme.R(276, 342, 104, 36);
-            _btnGpuApply.Click += delegate { ApplyGpuMode(); };
-            p.Controls.Add(_btnGpuApply);
 
             // 开机自启 + 状态行
-            p.Controls.Add(Lbl("开机自启", Theme.Cn, 13, Theme.TextMain, M, 400));
-            p.Controls.Add(Lbl("登录时以管理员身份启动", Theme.Cn, 11, Theme.TextDim, 92, 403));
+            p.Controls.Add(Lbl("开机自启", Theme.Cn, 13, Theme.TextMain, M, 372));
+            p.Controls.Add(Lbl("登录时以管理员身份启动", Theme.Cn, 11, Theme.TextDim, 92, 375));
             _tglStartup = new ToggleSwitch();
-            _tglStartup.Bounds = Theme.R(ToggleRight, 397, 44, 24);
+            _tglStartup.Bounds = Theme.R(ToggleRight, 369, 44, 24);
             _tglStartup.CheckedChanged += delegate
             {
                 if (_suppress || _app == null) return;
@@ -438,7 +425,7 @@ namespace MiCtl
             };
             p.Controls.Add(_tglStartup);
 
-            _lblStatus = Lbl("", Theme.Cn, 10.5f, Theme.TextDim, M, 438);
+            _lblStatus = Lbl("", Theme.Cn, 10.5f, Theme.TextDim, M, 410);
             p.Controls.Add(_lblStatus);
         }
 
@@ -608,10 +595,11 @@ namespace MiCtl
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
-                // GPU 模式
+                // GPU 模式：只显示（A7S 的固件未开放软件切换——fn9 SET 被拒，游戏盒子该功能也仅 A7SR）
                 if (s.GpuMode.HasValue) _gpuModeDetected = s.GpuMode;
-                _segGpu.Enabled = s.MifsAvailable;
-                UpdateGpuUi();
+                _lblGpuModeValue.Text = _gpuModeDetected.HasValue
+                    ? GpuModeNames[_gpuModeDetected.Value]
+                    : "无法识别";
 
                 _tglStartup.Checked = s.StartupEnabled;
 
@@ -750,26 +738,6 @@ namespace MiCtl
             return mb >= 1024 ? (mb / 1024).ToString("0.##") + " GB" : mb.ToString("0.#") + " MB";
         }
 
-        private void UpdateGpuUi()
-        {
-            _suppress = true;
-            try
-            {
-                _segGpu.SelectedIndex = _gpuChoice;
-                bool live = _state.MifsAvailable;
-                _btnGpuApply.Enabled = live && _gpuChoice >= 0 && _gpuModeDetected.HasValue
-                    && _gpuChoice != _gpuModeDetected.Value;
-                if (_gpuModeDetected.HasValue)
-                    _lblGpuModeNote.Text = "当前为" + GpuModeNames[_gpuModeDetected.Value] + "，切换后重启生效";
-                else
-                    _lblGpuModeNote.Text = "无法识别当前模式，切换后重启生效";
-            }
-            finally
-            {
-                _suppress = false;
-            }
-        }
-
         // ---------------- 后台事件 → UI 线程 ----------------
         private void OnAppUpdated()
         {
@@ -863,34 +831,6 @@ namespace MiCtl
             {
                 return null;
             }
-        }
-
-        private void ApplyGpuMode()
-        {
-            if (_app == null || _gpuChoice < 0) return;
-            string name = GpuModeNames[_gpuChoice];
-            if (MessageBox.Show(
-                    "向固件发送切换到「" + name + "」的指令。\n\n" +
-                    "这个功能在本机还没有验证过是否真的生效，要重启才能看到结果。确定发送吗？",
-                    "MiCtl", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-
-            if (_app.Mifs.SetGpuMode(_gpuChoice))
-            {
-                MessageBox.Show(
-                    "固件已接受指令。\n\n是否真的切换成功要重启后才能确认。如果重启后模式没变，" +
-                    "说明这台机器不支持软件切换，请在 BIOS 里设置。",
-                    "MiCtl", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("指令没有被固件接受。", "MiCtl",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            // 发送后回到"当前识别到的模式"，避免界面假装已经切换
-            _gpuChoice = _gpuModeDetected.HasValue ? _gpuModeDetected.Value : -1;
-            UpdateGpuUi();
         }
 
         /// <summary>预览用：把所有控件的过渡动画直接停到终点</summary>

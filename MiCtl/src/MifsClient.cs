@@ -81,7 +81,7 @@ namespace MiCtl
         public static class Fn
         {
             public const byte PerMode = 8;          // 性能档位：固件真实映射 2=静谧 1=均衡 0/3=极速（见 Profile 枚举，勿按字面序理解）
-            public const byte GpuMode = 9;          // 本机 GET 返回的是风扇/温度状态（见 GetFanTempStatus）；SET 的定义是 GPU 模式切换（未验证）
+            public const byte GpuMode = 9;          // 本机 GET 返回风扇/温度状态包（"GPU_MODE"是 Linux 驱动注释，本机不符）；SET 被固件拒绝（探针实测）——A7S 无 GPU 模式软件切换通道
             public const byte KbdType = 10;
             public const byte FnLock = 11;          // 本机读取恒为 1，不是 Fn 锁状态；Fn 锁状态在 EC 事件 id 7
             public const byte TpLock = 12;          // 触控板锁: 0/1
@@ -306,15 +306,8 @@ namespace MiCtl
             return Set(Fn.PerMode, new byte[] { (byte)p });
         }
 
-        /// <summary>
-        /// 发送 GPU 模式切换指令（fn9 SET，0=混合 1=独显直连 2=UMA，定义来自 Linux bitland-mifs-wmi 驱动）。
-        /// 本机只确认过"固件返回成功"；指令是否真的改变 GPU 模式尚未验证（要重启才看得到）。
-        /// 当前模式无法用 fn9 GET 读取——GET 返回的是风扇/温度状态，不是模式。
-        /// </summary>
-        public bool SetGpuMode(int mode)
-        {
-            return Set(Fn.GpuMode, new byte[] { (byte)mode });
-        }
+        // GPU 模式切换已删除：fn9 SET 被本机固件拒绝（探针实测 FnGpuProbe），且游戏盒子的该功能仅对 A7SR 机型开放
+        // （前端 productIsA7SR 检测直接挡住 A7S）。A7S 切换 GPU 模式只能重启进 BIOS。
 
         /// <summary>探测功能码在本 BIOS 是否支持（只 GET）</summary>
         public bool IsGetSupported(byte fn)

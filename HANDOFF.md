@@ -120,8 +120,8 @@ fn9 的一条实际响应（30 字节）：
 5. **软件切换 Fn 锁：解锁方向已实现，锁定方向固件未开放**。游戏盒子的开关实测有效（MiCtl 的 pill 实时跟随）→ 探针找到解锁通道是 fn10 SET {1}；但 fn10 {0} 是触控板动作（第一版双向开关的 bug 来源），SET 全枚举确认 MIFS 没有"锁定"通道。所以界面 Fn 锁行 = 状态 pill + **"解锁 Fn"按钮**（仅锁定态显示，AppController.SetFnLock(false)）；锁定请按 Fn+Esc。游戏盒子的锁定方向走 MiServiceDaemon.sys 驱动 IOCTL，如需补齐可从 MiService.exe 的字符串与 IOCTL 逆向入手（材料已入库）。
 6. **触控板的两层状态已经拆开显示，但没实测。** 界面开关现在只表示并控制设备层（pnputil）；键盘快捷键那一层（EC 事件，启动后没收到过事件时未知）单独用一个"快捷键已锁定"标签提示。原来两层合在一个开关上、取消禁用后会弹回去的问题，在逻辑上不再出现，但没有在真实窗口里验证过。
 7. **游戏盒子在这台机器上到底怎么实现触控板 / Fn 锁 / Win 键锁的切换，没有查清**。前端有 `set_a7_touchpad_status`、`set_a7_fn_key_status`、`set_a7_windows_key_status`、`set_a7_down_key_mode`。固件接口的 fn12（驱动里标为触控板锁）在本机返回不支持。`rev/rtti.txt` 里能看到 `EnableTouchpad` / `DisableFnKey` / `GetDownKeyMode` 等类名，但它们挂在 `inventec_sync_operation` 和 `syncoperation` 两个命名空间下，二进制里没有 Bitland 字样，也没有 Inventec / Quanta 的 WMI 类名——没有证据表明本机走这些类。
-8. **GPU 模式切换是否生效**。固件会接受 fn9 的写入并返回成功，但读不回模式，要重启才知道结果，没试过。从游戏盒子前端代码看，这个功能只对 A7SR 机型开放。界面的提示语已经改成如实表述。
-9. **fn10、fn11 的含义**未知，读数恒为 0 和 1。
+8. ~~GPU 模式切换是否生效~~ **已定案（2026-11-26）：不可实现，界面切换功能已删除**。fn9 SET 被本机固件拒绝（FnGpuProbe 实测：{0}/{1}/{2} 全部返回 False，无 EC 事件，fn9 GET 只有风扇转速自然波动）；游戏盒子的 GPU 模式切换仅对 A7SR 机型开放（前端 productIsA7SR 检测直接挡住 A7S）。GPU 模式行改为纯显示（当前模式 + "切换需重启进 BIOS"）。
+9. ~~fn10、fn11 的含义~~未知，读数恒为 0 和 1。**已定案（2026-11-26）**：fn10 = 热键动作模拟（0 = 触控板启用、1 = Fn 解锁，见第 4 节）；fn11 = 死码（任何 payload 均无效）。
 
 ### 可选的改进
 
