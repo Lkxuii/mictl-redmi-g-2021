@@ -323,13 +323,25 @@ namespace MiCtl
         }
 
         /// <summary>
-        /// 切换 Fn 锁（fn10 "键盘类型"）。2026-11-26 探针验证：payload 1 = 解锁（F1–F12 出音量/亮度，
-        /// EC 推 id7 value 0）；payload 0 = 锁定（F1–F12 为功能键）。fn11 SET 不生效（勿用）。
-        /// 切换结果经 EC 事件 id7 确认（SET 后约 0.2 秒推送）。
+        /// <summary>
+        /// 热键动作（fn10）：把 Fn 切到解锁（F1–F12 出音量/亮度等媒体键）。
+        /// 2026-11-26 探针验证：SET {1} 后 EC 推 id7 value0（约 0.2 秒内）。
+        /// 注意本机 fn10 是"热键动作模拟"：payload 0 是触控板启用动作（EC 推 id6 value1），
+        /// 不是 Fn 锁开关；"锁定"方向无 fn 通道（SET 全枚举验证）。
         /// </summary>
-        public bool SetFnMode(int value)
+        public bool SetFnUnlock()
         {
-            return Set(Fn.KbdType, new byte[] { (byte)value });
+            return Set(Fn.KbdType, new byte[] { 1 });
+        }
+
+        /// <summary>
+        /// 热键动作（fn10）：把 EC 层的触控板设为启用（对应解锁态 F9 的"启用"方向）。
+        /// 2026-11-26 探针验证：SET {0} 后 EC 推 id6 value1（三次同值，非 toggle）。
+        /// 此通道只有"启用"方向，无"禁用"（禁用走设备层 pnputil 或键盘 Fn+F9）。
+        /// </summary>
+        public bool SetTouchpadOn()
+        {
+            return Set(Fn.KbdType, new byte[] { 0 });
         }
 
         public void Dispose()

@@ -339,6 +339,7 @@ namespace MiCtl
             p.Controls.Add(Lbl("禁用触控板", Theme.Cn, 13, Theme.TextMain, M, y + 11));
             _pillTouchpadEc = new StatusPill();
             _pillTouchpadEc.Location = Theme.P(M + 92, y + 8);
+            _tips.SetToolTip(_pillTouchpadEc, "触控板被键盘快捷键（Fn+F9）锁定。\n按 Fn+F9 可解锁；MiCtl 无法软件解除这一层。");
             p.Controls.Add(_pillTouchpadEc);
             _tglTouchpad = new ToggleSwitch();
             _tglTouchpad.Bounds = Theme.R(ToggleRight, y + 7, 44, 24);
@@ -348,6 +349,10 @@ namespace MiCtl
                 if (!TouchpadControl.SetDisabled(_tglTouchpad.Checked))
                     MessageBox.Show("触控板控制失败：没有找到触控板设备，或权限不足。", "MiCtl",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // 启用方向：若键盘快捷键那一层（EC）仍锁定，用 fn10 热键动作把 EC 层也启用，
+                // 否则触控板依旧不动（两层互相独立，见交接文档）。
+                if (!_tglTouchpad.Checked && _app.FanWatcher != null && _app.FanWatcher.TouchpadEventValue == 0)
+                    _app.SetTouchpadOn();
                 _app.RefreshDeviceStates();
                 ApplyLive();
             };
@@ -391,9 +396,9 @@ namespace MiCtl
             _btnUnlockFn.Click += delegate
             {
                 if (_app == null) return;
-                if (!_app.SetFnLock(false))
+                if (!_app.UnlockFn())
                 {
-                    MessageBox.Show("Fn 锁切换失败：固件接口没有响应。", "MiCtl",
+                    MessageBox.Show("Fn 解锁失败：固件接口没有响应。", "MiCtl",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 ApplyLive();
@@ -574,9 +579,10 @@ namespace MiCtl
                 _stpLow.Enabled = s.AutoEnabled && s.MifsAvailable;
                 _stpHigh.Enabled = s.AutoEnabled && s.MifsAvailable;
 
-                // 触控板：开关只表示设备层；键盘快捷键那一层单独用标签提示
-                _tglTouchpad.Checked = s.TouchpadDeviceDisabled;
+                // 触控板：开关表示"实际可用性" = !(设备禁用 || 键盘快捷键锁定)。
+                // 两层互相独立：MiCtl 管设备层（pnputil），键盘快捷键走 EC（Fn+F9）。
                 bool ecLocked = s.TouchpadEcValue.HasValue && s.TouchpadEcValue.Value == 0;
+                _tglTouchpad.Checked = s.TouchpadDeviceDisabled || ecLocked;
                 if (ecLocked) _pillTouchpadEc.Set("快捷键已锁定", Theme.Orange);
                 _pillTouchpadEc.Visible = ecLocked;
 

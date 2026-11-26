@@ -39,16 +39,25 @@ namespace MiCtl
         public bool FnLockFailed { get; private set; }
         private DateTime _fnLockPendingSince;
 
-        /// <summary>软件切换 Fn 锁（fn10：0 = 锁定/F1–F12 功能键，1 = 解锁/媒体键）。结果经 EC 事件 id7 确认。</summary>
-        public bool SetFnLock(bool lockOn)
+        /// <summary>软件解锁 Fn（fn10 热键动作）。锁定方向固件未开放（SET 全枚举验证），请按 Fn+Esc。
+        /// 结果经 EC 事件 id7 确认。</summary>
+        public bool UnlockFn()
         {
             if (!Mifs.Available) return false;
-            bool ok = Mifs.SetFnMode(lockOn ? 0 : 1);
+            bool ok = Mifs.SetFnUnlock();
             if (!ok) return false;
             FnLockPending = true;
             FnLockFailed = false;
             _fnLockPendingSince = DateTime.Now;
             return true;
+        }
+
+        /// <summary>把 EC 层的触控板设为启用（fn10 热键动作，只有"启用"方向）。
+        /// 用于：设备层已启用但 EC 层仍被键盘快捷键锁定时，避免"开关显示启用但触控板不动"。</summary>
+        public bool SetTouchpadOn()
+        {
+            if (!Mifs.Available) return false;
+            return Mifs.SetTouchpadOn();
         }
 
         public void ClearFnLockFailed() { FnLockFailed = false; }
