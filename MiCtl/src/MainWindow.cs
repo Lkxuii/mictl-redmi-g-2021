@@ -388,7 +388,7 @@ namespace MiCtl
             _pillFnLock.Location = Theme.P(M + 92, y + 8);
             _tips.SetToolTip(_pillFnLock, fnTip);
             p.Controls.Add(_pillFnLock);
-            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, 0, y + 12);
+            _lblFnNote = Lbl("锁定 = 功能键；解锁 = 媒体键", Theme.Cn, 11, Theme.TextDim, M + 92, y + 12);
             _tips.SetToolTip(_lblFnNote, fnTip);
             p.Controls.Add(_lblFnNote);
             _btnUnlockFn = new GhostButton("解锁 Fn");
@@ -599,6 +599,7 @@ namespace MiCtl
                         fnv == 1 ? Theme.Green : (fnv == 0 ? Theme.Orange : Theme.TextDim));
                     _btnUnlockFn.Visible = fnv == 1;
                 }
+                _lblFnNote.Left = _pillFnLock.Right + Theme.S(10);
                 _btnUnlockFn.Enabled = s.MifsAvailable;
                 if (_app.FnLockFailed)
                 {
