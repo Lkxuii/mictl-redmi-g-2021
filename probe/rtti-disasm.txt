@@ -1,0 +1,5 @@
+=== EnableTouchpad@inventec_sync_operation  (pCD RVA 0xE0160) ===
+  解析失败: error('unpack requires a buffer of 4 bytes')
+
+=== DisableTouchpad@inventec_sync_operation  (pCD RVA 0xE01E8) ===
+  解析失败: error('unpack requires a buffer of 4 bytes')

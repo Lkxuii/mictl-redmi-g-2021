@@ -74,14 +74,79 @@ namespace MiCtl
 
         private const uint CM_LOCATE_DEVNODE_NORMAL = 0x00000000;
 
-        /// <summary>对单个设备实例执行禁用/启用（cfgmgr32，进程内调用，无子进程）</summary>
-        private static bool SetDeviceEnabled(string deviceId, bool enable)
+        // ---- SetupDi 路径（设备管理器同款：SetClassInstallParams + CallClassInstaller）----
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SP_DEVINFO_DATA { public int cbSize; public Guid classGuid; public IntPtr devInst; }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SP_CLASSINSTALL_HEADER { public int cbSize; public uint devInst; }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SP_PROPCHANGE_PARAMS { public SP_CLASSINSTALL_HEADER header; public uint stateChange; public uint scope; }
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern IntPtr SetupDiCreateDeviceInfoList(IntPtr classGuid, IntPtr hwndParent);
+
+        [DllImport("setupapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern bool SetupDiOpenDeviceInfoW(IntPtr deviceInfoSet, string deviceInstanceId, IntPtr hwndParent, uint openFlags, ref SP_DEVINFO_DATA deviceInfoData);
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern bool SetupDiSetClassInstallParams(IntPtr deviceInfoSet, ref SP_DEVINFO_DATA deviceInfoData, ref SP_PROPCHANGE_PARAMS propertyChangeParams, int paramsSize);
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern bool SetupDiCallClassInstaller(uint installFunction, IntPtr deviceInfoSet, ref SP_DEVINFO_DATA deviceInfoData);
+
+        [DllImport("setupapi.dll")]
+        private static extern bool SetupDiDestroyDeviceInfoList(IntPtr deviceInfoSet);
+
+        private const uint DIF_PROPERTYCHANGE = 0x12;
+        private const uint DICS_ENABLE = 1;
+        private const uint DICS_DISABLE = 2;
+        private const uint DICS_FLAG_CONFIGSPECIFIC = 2;
+
+        /// <summary>SetupDi 路径：设备管理器同款的双步流程（SetClassInstallParams + CallClassInstaller）</summary>
+        private static bool SetDeviceEnabledSetupDi(string deviceId, bool enable)
+        {
+            IntPtr set = SetupDiCreateDeviceInfoList(IntPtr.Zero, IntPtr.Zero);
+            if (set == IntPtr.Zero || set == new IntPtr(-1)) return false;
+            try
+            {
+                SP_DEVINFO_DATA did = new SP_DEVINFO_DATA();
+                did.cbSize = Marshal.SizeOf(typeof(SP_DEVINFO_DATA));
+                if (!SetupDiOpenDeviceInfoW(set, deviceId, IntPtr.Zero, 0, ref did)) return false;
+
+                SP_CLASSINSTALL_HEADER hdr = new SP_CLASSINSTALL_HEADER();
+                hdr.cbSize = Marshal.SizeOf(typeof(SP_CLASSINSTALL_HEADER));
+                hdr.devInst = (uint)did.devInst.ToInt64();
+                SP_PROPCHANGE_PARAMS pcp = new SP_PROPCHANGE_PARAMS();
+                pcp.header = hdr;
+                pcp.stateChange = enable ? DICS_ENABLE : DICS_DISABLE;
+                pcp.scope = DICS_FLAG_CONFIGSPECIFIC;
+                if (!SetupDiSetClassInstallParams(set, ref did, ref pcp, Marshal.SizeOf(typeof(SP_PROPCHANGE_PARAMS)))) return false;
+                if (!SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, set, ref did)) return false;
+                return true;
+            }
+            finally
+            {
+                SetupDiDestroyDeviceInfoList(set);
+            }
+        }
+
+        /// <summary>CM_ 路径（cfgmgr32）：SetupDi 被拒时的回退</summary>
+        private static bool SetDeviceEnabledCm(string deviceId, bool enable)
         {
             IntPtr dn;
             int cr = CM_Locate_DevNodeW(out dn, deviceId, CM_LOCATE_DEVNODE_NORMAL);
             if (cr != 0) return false;                       // CR_SUCCESS = 0
             cr = enable ? CM_Enable_DevNode(dn, 0) : CM_Disable_DevNode(dn, 0);
             return cr == 0;
+        }
+
+        /// <summary>对单个设备实例执行禁用/启用：先 SetupDi（设备管理器同款），被拒再回退 CM_</summary>
+        private static bool SetDeviceEnabled(string deviceId, bool enable)
+        {
+            if (SetDeviceEnabledSetupDi(deviceId, enable)) return true;
+            return SetDeviceEnabledCm(deviceId, enable);
         }
 
         public static bool SetDisabled(bool disable)
