@@ -83,7 +83,7 @@ bitland-mifs-wmi.c      Linux 内核驱动参考副本（第三方，GPL）
 | Fn 锁语义（用户 2026-11-26 确认，纠正了他此前"fn 开 = 媒体键"的说法）：**锁定 = F1–F12 是正常功能键（F1 就是 F1）；解锁 = F1–F12 是媒体键（音量/亮度）** | 用户原话："锁定应该是正常的f1，解锁才是音量" |
 | **触控板两层联动的实际行为（用户 2026-11-26 验证）**：游戏盒子里切换触控板（EC 层）时，MiCtl 的开关与"快捷键已锁定"胶囊实时跟随；两层（设备层 pnputil→CM_ API、EC 层 fn10 {0}）任一禁用即显示"禁用"，启用路径自动解锁 EC 层 | 用户实测："触控板正常关闭启动，mictl 正常跟随" |
 | EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
-| EC 事件 id 7 的 value 对应（已对照确认）：value 1 = 锁定（F1 是正常 F1），value 0 = 解锁（F1–F12 出音量/亮度） | 用户 2026-11-26 对照：界面 pill 显示"已锁定"与 F1 实际行为一致 |
+| **触控板设备层的禁用/启用被火绒行为防御拦截（三条 API 全拒）**：pnputil 子进程、cfgmgr32 CM_Disable/Enable_DevNode、setupapi SetClassInstallParams+CallClassInstaller，全部拒绝访问（提权跑同命令成功，MiCtl 进程内被拒）——火绒按效果拦"未签名进程修改设备状态"，与 API 无关；信任区只豁免扫描不豁免行为防御 | 用户实测弹窗"禁用未生效：系统拒绝了更改"（三条路径全试）；probe/disable-test.txt（提权对照：pnputil 同命令成功） |
 | **fn11 SET 不能切换 Fn 锁**（已排除）：SET 0/1 与 7 种 payload 形态都返回成功，但无 EC 事件 id7、GET 恒为 1 | probe/FnLockProbe.cs → fnlock-probe.txt；FnLockProbe2.cs → fnlock-probe2.txt |
 | **fn10（"键盘类型"）SET 是"热键动作模拟"，不是 Fn 锁开关**：payload 0 = 触控板启用（EC 推 id6 value1，每次都推）；payload 1 = Fn 解锁（EC 推 id7 value0，0.2 秒内）；payload 2 = 无动作；payload 3~6 被拒 | probe/FnLockProbe3/4/5.cs → fnlock-probe3/4/5.txt；游戏盒子开关实测有效（用户 2026-11-26：游戏盒子里切换时 MiCtl 的 pill 实时跟随） |
 | **MIFS 的 SET 全枚举只有 3 个活码**：fn8（档位）、fn10（热键动作）、fn11（死码）——"Fn 锁定"方向没有 MIFS 通道（游戏盒子的锁定走它的私有层：MiService 服务 + MiServiceDaemon.sys 内核驱动，IOCTL 未逆向） | probe/FnLockProbe6.cs → set-enum.txt；scan-result.txt（MiServiceDaemon.sys 在运行） |
