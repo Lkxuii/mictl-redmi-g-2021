@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management;
+using System.Threading;
 
 namespace MiCtl
 {
@@ -88,7 +89,12 @@ namespace MiCtl
                     int rc = RunPnP(verb + " \"" + id + "\"");
                     if (rc == 0) ok++;
                 }
-                return ok > 0;
+                if (ok == 0) return false;
+                // pnputil 的 enable/disable 是异步生效的：复查实际状态，没切过去就算失败
+                //（否则开关会显示"已启用"但触控板不动）。
+                Thread.Sleep(1500);
+                bool now = IsDisabled();
+                return disable == now;
             }
             catch
             {

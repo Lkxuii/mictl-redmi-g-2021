@@ -346,12 +346,13 @@ namespace MiCtl
             _tglTouchpad.CheckedChanged += delegate
             {
                 if (_suppress || _app == null) return;
-                if (!TouchpadControl.SetDisabled(_tglTouchpad.Checked))
-                    MessageBox.Show("触控板控制失败：没有找到触控板设备，或权限不足。", "MiCtl",
+                bool wantDisable = _tglTouchpad.Checked;
+                if (!TouchpadControl.SetDisabled(wantDisable))
+                    MessageBox.Show("触控板" + (wantDisable ? "禁用" : "启用") + "未生效：系统拒绝了更改。\n启用方向若仍无效，可能触控板被键盘快捷键（Fn+F9）锁定。", "MiCtl",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                // 启用方向：若键盘快捷键那一层（EC）仍锁定，用 fn10 热键动作把 EC 层也启用，
-                // 否则触控板依旧不动（两层互相独立，见交接文档）。
-                if (!_tglTouchpad.Checked && _app.FanWatcher != null && _app.FanWatcher.TouchpadEventValue == 0)
+                // 启用方向：总是用 fn10 热键动作把 EC 层也设为启用（幂等动作；EC 缓存值可能过期，
+                // 只在缓存==0 时才发会漏掉被外部切到禁用的情况）。
+                if (!_tglTouchpad.Checked)
                     _app.SetTouchpadOn();
                 _app.RefreshDeviceStates();
                 ApplyLive();

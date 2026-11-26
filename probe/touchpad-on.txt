@@ -1,0 +1,9 @@
+MIFS 可用: True
+>>> SET fn10 {0}，观察 6 秒：
+    SET 返回: True
+    [   0.0s] EC 事件 type=1 id=6 value=1
+    [   0.0s] EC 事件 type=1 id=6 value=1
+
+结束时全部事件：
+    [   0.0s] EC 事件 type=1 id=6 value=1
+    [   0.0s] EC 事件 type=1 id=6 value=1
